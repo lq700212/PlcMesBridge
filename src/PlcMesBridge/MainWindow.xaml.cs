@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -36,6 +37,9 @@ public partial class MainWindow : Window
     private readonly StationPanel[] _panels = new StationPanel[8];
     private readonly DispatcherTimer _clock = new();
     private bool _useSim;
+    /// <summary>程序化重启中（设置切模式后自动重启）：关窗跳过"是否退出"确认，
+    /// 否则确认框卡住旧进程不退，新进程已起，造成双开。</summary>
+    private bool _isRestarting;
 
     public MainWindow()
     {
@@ -316,6 +320,7 @@ public partial class MainWindow : Window
         LbBeat.Content = LanguageService.Tr("PLC心跳");
         BtnLog.Content = LanguageService.Tr("MES 交互实时日志");
         BtnDebug.Content = BtnDebugM.Content = LanguageService.Tr("MES 接口调试界面");
+        BtnSettings.Content = BtnSettingsM.Content = LanguageService.Tr("设置");
         BtnLang.Content = BtnLangM.Content =
             LanguageService.CurrentLanguage == "CH" ? "English" : "中文";
         ColNo.Header = LanguageService.Tr("产品号");
@@ -329,6 +334,32 @@ public partial class MainWindow : Window
     private void BtnDebug_Click(object sender, RoutedEventArgs e) =>
         new MesDebugWindow().Show();
 
+    /// <summary>
+    /// 设置按钮（单机/多机视图共用）：先弹登录窗验 admin/123456，
+    /// 通过再弹设置窗切运行模式；模式变了自动重启
+    /// （先拉新进程再退当前进程，且跳过退出确认，保证旧进程一定退出）。
+    /// </summary>
+    private void BtnSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var login = new LoginWindow { Owner = this };
+        if (login.ShowDialog() != true)
+            return;
+        var settings = new SettingsWindow { Owner = this };
+        if (settings.ShowDialog() != true || !settings.ModeChanged)
+            return;
+        string? exe = Environment.ProcessPath;
+        if (exe == null)
+        {
+            MessageBox.Show(LanguageService.Tr("设置已保存，重启软件后生效"),
+                LanguageService.Tr("设置"),
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        _isRestarting = true;
+        Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true });
+        Application.Current.Shutdown();
+    }
+
     private void BoxLog_DoubleClick(object sender,
         System.Windows.Input.MouseButtonEventArgs e)
     {
@@ -338,7 +369,8 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
-        if (MessageBox.Show(LanguageService.Tr("是否退出?"), Title,
+        // 程序化重启不弹确认（确认框会卡住旧进程导致双开），用户手动关窗才确认。
+        if (!_isRestarting && MessageBox.Show(LanguageService.Tr("是否退出?"), Title,
                 MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
         {
             e.Cancel = true;

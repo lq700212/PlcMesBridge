@@ -4,12 +4,15 @@
              MinWidth="280" MinHeight="380">
     <!--机台面板（复刻自多机版 Panel1~10：机台名 + 心跳灯 + 日志 ListBox）。
         8 个实例由 UniformGrid 平铺，同一控件复用（老项目 8 套 Designer 复制的消除）。-->
-    <Border BorderBrush="Gray" BorderThickness="1" Margin="3" Padding="4">
+    <Border BorderBrush="{StaticResource FreshLightBorderBrush}" BorderThickness="1"
+            CornerRadius="8" Margin="3" Padding="4" Background="White">
         <DockPanel>
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                <Label x:Name="LblName" Content="机台" FontSize="14" FontWeight="Bold" />
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" VerticalAlignment="Center">
+                <Label x:Name="LblName" Content="机台" FontSize="14" FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource FreshPrimaryDeepBrush}" />
                 <Label x:Name="LblLive" Content="⚫" FontSize="16" Foreground="Gray"
-                       ToolTip="PLC心跳" />
+                       VerticalAlignment="Center" ToolTip="PLC心跳" />
             </StackPanel>
             <ListBox x:Name="BoxLog" MouseDoubleClick="BoxLog_DoubleClick"
                      SelectionChanged="BoxLog_Selected" HorizontalContentAlignment="Left" FontSize="12" />

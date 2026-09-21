@@ -1,0 +1,130 @@
+<!-- =====================================================================
+     FreshBlue：天蓝色小清新全局样式（对标 AgingTestSystem WinForms 观感）
+     白底 + 微软雅黑 + DodgerBlue 主按钮(DimGray 取消) + 浅蓝提示条。
+     App.xaml 全局合并，默认 Button 即主按钮样式，各窗体无需逐个指定。
+     新增样式键必须同步更新本文件头注释（键名 + 用途）。
+     ===================================================================== -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ============ 色板（取自 AgingTestSystem Designer 实测值） ============ -->
+    <Color x:Key="FreshPrimary">#1E90FF</Color>
+    <Color x:Key="FreshPrimaryDark">#1873CC</Color>
+    <Color x:Key="FreshPrimaryDeep">#1E50A0</Color>
+    <Color x:Key="FreshLightBg">#EEF5FF</Color>
+    <Color x:Key="FreshLightBorder">#D6E5FF</Color>
+    <Color x:Key="FreshCancel">#696969</Color>
+    <Color x:Key="FreshCancelDark">#555555</Color>
+    <Color x:Key="FreshBottomBar">#F8FAFC</Color>
+    <SolidColorBrush x:Key="FreshPrimaryBrush" Color="{StaticResource FreshPrimary}"/>
+    <SolidColorBrush x:Key="FreshPrimaryDarkBrush" Color="{StaticResource FreshPrimaryDark}"/>
+    <SolidColorBrush x:Key="FreshPrimaryDeepBrush" Color="{StaticResource FreshPrimaryDeep}"/>
+    <SolidColorBrush x:Key="FreshLightBgBrush" Color="{StaticResource FreshLightBg}"/>
+    <SolidColorBrush x:Key="FreshLightBorderBrush" Color="{StaticResource FreshLightBorder}"/>
+    <SolidColorBrush x:Key="FreshCancelBrush" Color="{StaticResource FreshCancel}"/>
+    <SolidColorBrush x:Key="FreshCancelDarkBrush" Color="{StaticResource FreshCancelDark}"/>
+    <SolidColorBrush x:Key="FreshBottomBarBrush" Color="{StaticResource FreshBottomBar}"/>
+
+    <!-- ============ 字体（全站微软雅黑，老项目原样） ============ -->
+    <Style TargetType="Window">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="FontFamily" Value="微软雅黑"/>
+    </Style>
+    <Style TargetType="Label">
+        <Setter Property="FontFamily" Value="微软雅黑"/>
+    </Style>
+    <Style TargetType="TextBox">
+        <Setter Property="FontFamily" Value="微软雅黑"/>
+        <Setter Property="Padding" Value="6,4"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FreshLightBorderBrush}"/>
+    </Style>
+    <Style TargetType="PasswordBox">
+        <Setter Property="FontFamily" Value="微软雅黑"/>
+        <Setter Property="Padding" Value="6,4"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FreshLightBorderBrush}"/>
+    </Style>
+    <Style TargetType="RadioButton">
+        <Setter Property="FontFamily" Value="微软雅黑"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- ============ 主按钮（DodgerBlue 白字圆角，悬停加深） ============ -->
+    <Style x:Key="FreshPrimaryButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="微软雅黑"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="{StaticResource FreshPrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="10,4"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background"
+                                    Value="{StaticResource FreshPrimaryDarkBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background"
+                                    Value="{StaticResource FreshPrimaryDeepBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--默认 Button 即主按钮：全站（含老窗体）一次换肤。-->
+    <Style TargetType="Button" BasedOn="{StaticResource FreshPrimaryButton}"/>
+
+    <!-- ============ 取消按钮（DimGray 白字，同圆角） ============ -->
+    <Style x:Key="FreshCancelButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="微软雅黑"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="{StaticResource FreshCancelBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="10,4"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background"
+                                    Value="{StaticResource FreshCancelDarkBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============ 浅蓝提示条（背景#EEF5FF + 边框#D6E5FF，深蓝字另行指定） ============ -->
+    <Style x:Key="FreshHintBorder" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource FreshLightBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FreshLightBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="10,8"/>
+    </Style>
+
+    <!-- ============ 顶栏底色（浅蓝通栏，内容控件保持白底可读） ============ -->
+    <SolidColorBrush x:Key="FreshTopBarBrush" Color="{StaticResource FreshLightBg}"/>
+</ResourceDictionary>

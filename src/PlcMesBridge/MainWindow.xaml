@@ -16,24 +16,25 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <!--状态带（微软雅黑16加粗，老项目原样）-->
-            <StackPanel Grid.Row="0" Orientation="Horizontal"
+            <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center"
+                        Background="{StaticResource FreshTopBarBrush}"
                         TextBlock.FontFamily="微软雅黑" TextBlock.FontSize="16"
                         TextBlock.FontWeight="Bold">
-                <Label x:Name="LbBeat" Content="PLC心跳" Margin="8,2"/>
-                <Label x:Name="LbBeatLamp" Content="⚫" Foreground="Gray"/>
-                <Label x:Name="LbCuring" Content="固化时间: " Margin="20,2"/>
-                <Label x:Name="LbInTime" Content="进入时间: " Margin="20,2"/>
-                <Label x:Name="LbBin" Content="库位ID: " Margin="20,2"/>
-                <Label x:Name="LbStatus" Content="物料状态" Margin="20,2"/>
+                <Label x:Name="LbBeat" Content="PLC心跳" Margin="8,2" VerticalAlignment="Center"/>
+                <Label x:Name="LbBeatLamp" Content="⚫" Foreground="Gray" VerticalAlignment="Center"/>
+                <Label x:Name="LbCuring" Content="固化时间: " Margin="20,2" VerticalAlignment="Center"/>
+                <Label x:Name="LbInTime" Content="进入时间: " Margin="20,2" VerticalAlignment="Center"/>
+                <Label x:Name="LbBin" Content="库位ID: " Margin="20,2" VerticalAlignment="Center"/>
+                <Label x:Name="LbStatus" Content="物料状态" Margin="20,2" VerticalAlignment="Center"/>
             </StackPanel>
             <!--统计带（微软雅黑14加粗）-->
-            <StackPanel Grid.Row="1" Orientation="Horizontal"
+            <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center"
                         TextBlock.FontFamily="微软雅黑" TextBlock.FontSize="14"
                         TextBlock.FontWeight="Bold">
-                <Label x:Name="LbTotal" Content="库内总物料:" Margin="8,2"/>
-                <Label x:Name="LbDone" Content="静置已完成:" Margin="20,2"/>
-                <Label x:Name="LbResting" Content="正在静置:" Margin="20,2"/>
-                <Label x:Name="LbTomorrow" Content="明日可完成:" Margin="20,2"/>
+                <Label x:Name="LbTotal" Content="库内总物料:" Margin="8,2" VerticalAlignment="Center"/>
+                <Label x:Name="LbDone" Content="静置已完成:" Margin="20,2" VerticalAlignment="Center"/>
+                <Label x:Name="LbResting" Content="正在静置:" Margin="20,2" VerticalAlignment="Center"/>
+                <Label x:Name="LbTomorrow" Content="明日可完成:" Margin="20,2" VerticalAlignment="Center"/>
             </StackPanel>
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
@@ -42,15 +43,18 @@
                 </Grid.ColumnDefinitions>
                 <!--左操作区-->
                 <DockPanel Grid.Column="0" Margin="6">
-                    <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                        <Button x:Name="BtnConnect" Content="连接PLC" Width="120" Height="48"
-                                Margin="2" Click="BtnConnect_Click"/>
-                        <Button x:Name="BtnLang" Content="English" Width="80" Height="48"
-                                Margin="2" Click="BtnLang_Click"/>
+                    <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                               VerticalAlignment="Center">
+                        <Button x:Name="BtnConnect" Content="连接PLC" Width="120" Height="44"
+                                Margin="2" VerticalAlignment="Center" Click="BtnConnect_Click"/>
+                        <Button x:Name="BtnLang" Content="English" Width="80" Height="44"
+                                Margin="2" VerticalAlignment="Center" Click="BtnLang_Click"/>
                         <Button x:Name="BtnLog" Content="MES 交互实时日志" Width="130" Height="44"
-                                Margin="2" Click="BtnLog_Click"/>
+                                Margin="2" VerticalAlignment="Center" Click="BtnLog_Click"/>
                         <Button x:Name="BtnDebug" Content="MES 接口调试界面" Width="130" Height="44"
-                                Margin="2" Click="BtnDebug_Click"/>
+                                Margin="2" VerticalAlignment="Center" Click="BtnDebug_Click"/>
+                        <Button x:Name="BtnSettings" Content="设置" Width="80" Height="44"
+                                Margin="2" VerticalAlignment="Center" Click="BtnSettings_Click"/>
                     </WrapPanel>
                     <ListBox x:Name="BoxLog" FontSize="12"
                              MouseDoubleClick="BoxLog_DoubleClick"/>
@@ -76,15 +80,19 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="6,4">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="6,4"
+                        VerticalAlignment="Center" Background="{StaticResource FreshTopBarBrush}">
                 <Button x:Name="BtnConnectM" Content="连接设备" Width="120" Height="40"
-                        Margin="2" Click="BtnConnectM_Click"/>
+                        Margin="2" VerticalAlignment="Center" Click="BtnConnectM_Click"/>
                 <Button x:Name="BtnLangM" Content="语言" Width="80" Height="40"
-                        Margin="2" Click="BtnLang_Click"/>
+                        Margin="2" VerticalAlignment="Center" Click="BtnLang_Click"/>
                 <Button x:Name="BtnDebugM" Content="MES 接口调试界面" Width="140" Height="40"
-                        Margin="2" Click="BtnDebug_Click"/>
+                        Margin="2" VerticalAlignment="Center" Click="BtnDebug_Click"/>
+                <Button x:Name="BtnSettingsM" Content="设置" Width="80" Height="40"
+                        Margin="2" VerticalAlignment="Center" Click="BtnSettings_Click"/>
                 <Label Content="视图:" VerticalAlignment="Center" Margin="12,0,2,0"/>
-                <ComboBox x:Name="CmbView" Width="160" Height="30"
+                <ComboBox x:Name="CmbView" Width="160" Height="30" VerticalAlignment="Center"
+                          VerticalContentAlignment="Center"
                           SelectionChanged="CmbView_Changed"/>
                 <Label x:Name="LbCycle" Content="扫描周期: " Margin="16,0"
                        VerticalAlignment="Center"/>

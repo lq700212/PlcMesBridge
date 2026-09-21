@@ -24,12 +24,20 @@ dotnet test tests/PlcMesBridge.Tests/PlcMesBridge.Tests.csproj --nologo
 # 4. 模拟联调（无真机）：复制 config.sample.ini 为
 #    src/PlcMesBridge/bin/Debug/net8.0-windows/config/config.ini，
 #    设 Mode=Single/Multi + Simulate=1，启动 PlcMesBridge.exe
+#    也可在界面点"设置"按钮（登录 admin/123456）切换单机/多机，重启生效
 ```
+
+## 界面设置
+
+- 主窗（单机/多机视图）均有"设置"按钮 → 登录窗（admin/123456，
+  可勾"记住密码"下次预填） → 设置窗单机/多机二选一 → 保存：
+  模式变了自动重启生效，没变只提示已保存。
+- 风格：天蓝色小清新全局样式（`src/PlcMesBridge/Styles/FreshBlue.xaml`）。
 
 ## 目录
 
 - `src/PlcMesBridge.Core/` — 业务与基础（INI/SQLite/MES/通讯/单机/多机逻辑）
 - `src/PlcMesBridge/` — WPF 界面（主窗/调试/报警/日志/图片窗）
-- `tests/PlcMesBridge.Tests/` — 33 例 xUnit
+- `tests/PlcMesBridge.Tests/` — 42 例 xUnit
 - `extern/kaleidoscope/` — 通讯子模块（独立仓库，勿直接改，见 AGENTS.md）
 - `config.sample.ini` — 现场配置样例

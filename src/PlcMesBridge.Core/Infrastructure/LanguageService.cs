@@ -148,6 +148,23 @@ public static class LanguageService
         ["实测值"] = "Actual Value",
         ["标准值"] = "Standard Value",
         ["上限"] = "Max Limit",
+        // ---- 设置窗（登录门禁 + 运行模式切换，V0.0.2 新增）----
+        ["设置"] = "Settings",
+        ["登录"] = "Login",
+        ["用户名"] = "Username",
+        ["密码"] = "Password",
+        ["确定"] = "OK",
+        ["取消"] = "Cancel",
+        ["保存"] = "Save",
+        ["运行模式"] = "Run Mode",
+        ["单机固化收料"] = "Single Machine",
+        ["多机通用网关"] = "Multi-Machine Gateway",
+        ["用户名或密码错误"] = "Wrong username or password",
+        ["切换模式保存后自动重启软件"] = "Saving a mode change restarts the app automatically",
+        ["设置已保存"] = "Settings saved",
+        ["设置已保存，重启软件后生效"] = "Settings saved, restart to take effect",
+        ["请登录后进入设置"] = "Please login to open settings",
+        ["记住密码"] = "Remember me",
     };
 
     /// <summary>翻译。中文模式直接返回原文；英文模式查不到回退原文（老项目 Case Else 语义）。</summary>
