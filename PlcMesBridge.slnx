@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PlcMesBridge.Core/PlcMesBridge.Core.csproj" />
+    <Project Path="src/PlcMesBridge/PlcMesBridge.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PlcMesBridge.Tests/PlcMesBridge.Tests.csproj" />
+  </Folder>
+</Solution>

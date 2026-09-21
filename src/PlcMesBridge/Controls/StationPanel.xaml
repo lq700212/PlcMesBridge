@@ -1,0 +1,18 @@
+<UserControl x:Class="PlcMesBridge.Controls.StationPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             MinWidth="280" MinHeight="380">
+    <!--机台面板（复刻自多机版 Panel1~10：机台名 + 心跳灯 + 日志 ListBox）。
+        8 个实例由 UniformGrid 平铺，同一控件复用（老项目 8 套 Designer 复制的消除）。-->
+    <Border BorderBrush="Gray" BorderThickness="1" Margin="3" Padding="4">
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                <Label x:Name="LblName" Content="机台" FontSize="14" FontWeight="Bold" />
+                <Label x:Name="LblLive" Content="⚫" FontSize="16" Foreground="Gray"
+                       ToolTip="PLC心跳" />
+            </StackPanel>
+            <ListBox x:Name="BoxLog" MouseDoubleClick="BoxLog_DoubleClick"
+                     SelectionChanged="BoxLog_Selected" HorizontalContentAlignment="Left" FontSize="12" />
+        </DockPanel>
+    </Border>
+</UserControl>

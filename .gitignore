@@ -1,0 +1,32 @@
+# ===== 构建产物（子模块 extern/kaleidoscope 内部自带规则，本文件只管主仓库）=====
+bin/
+obj/
+out/
+TestResults/
+
+# ===== 运行时数据（现场运行落盘，只留样例进仓库）=====
+log/
+logs/
+Logs/
+DataBase/*.db3
+DataBase/*.db
+*.log
+config/*.ini
+config/*.json
+!config/*.sample.ini
+!config/*.sample.json
+
+# ===== 机密（绝不入库）=====
+hsl.dat
+*.kcfg
+HslLicense.dat
+
+# ===== 本地状态 =====
+.vs/
+*.user
+*.suo
+.cache/
+
+# ===== 系统文件 =====
+Desktop.ini
+Thumbs.db

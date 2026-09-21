@@ -1,0 +1,10 @@
+<Window x:Class="PlcMesBridge.ImageWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="图片查看" Width="801" Height="560" WindowStartupLocation="CenterScreen">
+    <!--图片查看（1:1 多机版 FormImage：铺满缩放图 + 顶部全路径）。-->
+    <DockPanel>
+        <Label x:Name="LbPath" DockPanel.Dock="Top" FontSize="12"/>
+        <Image x:Name="Img" Stretch="Uniform"/>
+    </DockPanel>
+</Window>

@@ -1,0 +1,15 @@
+<Window x:Class="PlcMesBridge.MesAlarmWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MES 报警信息" Width="800" Height="450" Topmost="True"
+        WindowStartupLocation="CenterScreen">
+    <!--报警窗（1:1 FormMESAlarm：多行只读文本 + 名称 + 关闭，置顶非模态）。-->
+    <DockPanel Margin="8">
+        <Label x:Name="LbName" Content="Machine:" DockPanel.Dock="Top"/>
+        <Button x:Name="BtnClose" Content="关闭" Width="187" Height="41"
+                DockPanel.Dock="Bottom" HorizontalAlignment="Center" Margin="0,6,0,0"
+                Click="BtnClose_Click"/>
+        <TextBox x:Name="TxtMsg" IsReadOnly="True" TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto" AcceptsReturn="True"/>
+    </DockPanel>
+</Window>
