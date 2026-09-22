@@ -293,11 +293,18 @@ public class StationGateway : IDisposable
             Math.Max(v2?.Length ?? 0, 1));
     }
 
+    /// <summary>
+    /// 分段地址算法（老项目原样：有R用R否则D，数字部分+偏移，无补零）。
+    /// 加固两处（heritage 行为不变，合法输入结果与老项目逐字一致）：
+    /// ① 大小写不敏感（"r17900" 也认 R）；② 数字部分解析失败直接返回原地址，
+    /// 不抛（配错地址走 WriteFail 回写，不炸后台线程）。
+    /// </summary>
     internal static string ShiftAddr(string addr, int offset)
     {
-        string prefix = addr.Contains("R") ? "R" : "D";
-        string num = addr.Replace("R", string.Empty).Replace("D", string.Empty);
-        return prefix + (int.Parse(num) + offset);
+        string prefix = addr.Contains('R', StringComparison.OrdinalIgnoreCase) ? "R" : "D";
+        string num = addr.Replace("R", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("D", string.Empty, StringComparison.OrdinalIgnoreCase);
+        return int.TryParse(num, out int n) ? prefix + (n + offset) : addr;
     }
 
     /// <summary>异常回写（老项目 writeFail lambda 原样：STATUS=2/MSG=NG/DATA=" "/完成=1/触发复0）。</summary>
@@ -346,6 +353,8 @@ public class MultiMachineManager : IDisposable
     /// <summary>
     /// 连接全部启用的机台并起线程（老项目 Button1_Click：PLCuse=1 才连，
     /// 否则记"已配置为不连接本工站PLC"）。返回 (成功数, 跳过数)。
+    /// 约定：Stations 只收"连上且线程已起"的网关；连失败的当场释放、不进列表
+    /// （语义清晰 + 不占 PLC 客户端到 Manager.Dispose）。
     /// </summary>
     public (int Ok, int Skipped) ConnectAll()
     {
@@ -366,13 +375,14 @@ public class MultiMachineManager : IDisposable
             if (gw.Connect(out _))
             {
                 gw.Start();
+                _stations.Add(gw);
                 ok++;
             }
             else
             {
                 StationBroken?.Invoke(i);
+                gw.Dispose();
             }
-            _stations.Add(gw);
         }
         return (ok, skipped);
     }

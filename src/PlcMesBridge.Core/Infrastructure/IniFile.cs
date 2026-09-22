@@ -56,7 +56,9 @@ public static class IniFile
         int n = GetPrivateProfileString(section, key, string.Empty, sb, sb.Capacity, iniPath);
         if (n > 0 && int.TryParse(sb.ToString(0, n), out int v))
             return (byte)v;
-        Write(iniPath, section, key, defaultValue.ToString("#0.000"));
+        // 注意：缺省必须写纯整数文本。老项目用 "#0.000" 格式（如 "799.000"），
+        // int.TryParse 解析不了，下次读还是失败——此处改写纯整数，保证自愈一次就好。
+        Write(iniPath, section, key, defaultValue.ToString());
         return (byte)defaultValue;
     }
 
@@ -67,7 +69,8 @@ public static class IniFile
         int n = GetPrivateProfileString(section, key, string.Empty, sb, sb.Capacity, iniPath);
         if (n > 0 && int.TryParse(sb.ToString(0, n), out int v))
             return v;
-        Write(iniPath, section, key, defaultValue.ToString("#0.000"));
+        // 同 ReadByte：缺省写纯整数（不要 "#0.000"），否则自愈的值下次还解析失败。
+        Write(iniPath, section, key, defaultValue.ToString());
         return (int)defaultValue;
     }
 

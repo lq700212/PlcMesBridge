@@ -1,0 +1,71 @@
+// =========================================================================
+// 中英词典覆盖测试：UI 实际 Tr() 的键必须在英文表里找得到
+//
+// 背景：LanguageService 是中英两套词典合并的（单机 50+ / 多机 60+），
+// 漏一个键，切英文后界面就蹦一句中文。查不到回退原文是 heritage 语义，
+// 但"常用键全覆盖"是本文件要锁的：StatusKey 4 状态 + 物料状态 +
+// 8 机台名 + 设置登录链 + 网关流程键，切 EN 后必须全变英文。
+// 新增界面文案时，顺手来这里加一个键。
+// =========================================================================
+
+using PlcMesBridge.Core.Infrastructure;
+using PlcMesBridge.Core.Mes;
+using PlcMesBridge.Tests.Mocks;
+
+namespace PlcMesBridge.Tests;
+
+public class LanguageCoverageTests : IDisposable
+{
+    private readonly TestScope _scope = new();
+
+    public void Dispose() => _scope.Dispose();
+
+    [Fact(DisplayName = "UI常用键英文全覆盖")]
+    public void UiKeys_AllTranslated()
+    {
+        LanguageService.CurrentLanguage = "EN";
+        try
+        {
+            string[] keys =
+            {
+                "物料装载", "物料卸载", "强制出料", "资料获取", "物料状态",
+                "连接PLC", "连接设备", "PLC心跳", "PLC通信", "是否退出?",
+                "设置", "登录", "用户名", "密码", "确定", "取消", "保存",
+                "运行模式", "单机固化收料", "多机通用网关",
+                "MES上传成功", "MES返回NG", "MES网络异常/超时",
+                "MES反序列化失败", "MES返回数据解析为空", "MES返回数据解析异常",
+                "MES 交互实时日志", "清空当前显示", "MES 接口调试界面",
+                "库位ID为空", "未查询到相应数据",
+                "固化时间: ", "进入时间: ", "库位ID: ",
+                "库内总物料:", "静置已完成:", "正在静置:", "明日可完成:",
+                "产品号", "产品ID",
+            };
+            foreach (string k in keys)
+            {
+                string en = LanguageService.Tr(k);
+                Assert.False(string.IsNullOrWhiteSpace(en), $"空翻译: {k}");
+                Assert.NotEqual(k, en); // 中文模式原样返回，英文必须变
+            }
+            foreach (string name in MesLogger.StationNames)
+                Assert.NotEqual(name, LanguageService.Tr(name));
+        }
+        finally
+        {
+            LanguageService.CurrentLanguage = "CH";
+        }
+    }
+
+    [Fact(DisplayName = "未知键回退原文")]
+    public void Unknown_FallsBack_Original()
+    {
+        LanguageService.CurrentLanguage = "EN";
+        try
+        {
+            Assert.Equal("没见过的词条", LanguageService.Tr("没见过的词条"));
+        }
+        finally
+        {
+            LanguageService.CurrentLanguage = "CH";
+        }
+    }
+}

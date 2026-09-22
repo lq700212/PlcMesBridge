@@ -89,7 +89,19 @@ public static class AppConfig
         MesConfig.TriggerApi0031 = IniFile.ReadStr(ini, "MES", "TriggerAddrAPI0031", DefaultTriggers[3]);
         MesConfig.TriggerApi0032 = IniFile.ReadStr(ini, "MES", "TriggerAddrAPI0032", DefaultTriggers[4]);
         MesConfig.TriggerApi0033 = IniFile.ReadStr(ini, "MES", "TriggerAddrAPI0033", DefaultTriggers[5]);
-        MesConfig.DataLength = int.Parse(IniFile.ReadStr(ini, "MES", "DataLength", "799"));
+        // DataLength 必须容错：现场手改 ini 写错一个字符不能让启动崩（老项目无此键，
+        // 新项目新增；非法值回填缺省 799，保证网关读 JSON 长度永远可用）。
+        string dataLenRaw = IniFile.ReadStr(ini, "MES", "DataLength", "799");
+        if (int.TryParse(dataLenRaw, out int dataLen) && dataLen > 0)
+        {
+            MesConfig.DataLength = dataLen;
+        }
+        else
+        {
+            // 非法/非正数：回填缺省再取缺省（与 IniFile 自愈同一思想，见类头）。
+            IniFile.Write(ini, "MES", "DataLength", "799");
+            MesConfig.DataLength = 799;
+        }
 
         string[] names = { "API0027", "API0028", "API0030", "API0031", "API0032", "API0033" };
         for (int i = 0; i < 6; i++)

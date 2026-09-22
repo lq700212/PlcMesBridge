@@ -86,7 +86,7 @@
 | `src/PlcMesBridge/MesDebugWindow.*` | 调试窗：5 接口表单 + API0033 扩展 + 预览上传 |
 | `src/PlcMesBridge/MesLogWindow.*` | 日志窗（-1 单机全量 / >=0 分机台，关窗退订） |
 | `src/PlcMesBridge/MesAlarmWindow.*` / `ImageWindow.*` | 报警窗 / 图片查看 |
-| `src/PlcMesBridge/Services/LocalLogService.cs` | 本机操作日志落盘（截 50 字写文件，全量上界面） |
+| `src/PlcMesBridge.Core/Services/LocalLogService.cs` | 本机操作日志落盘（截 50 字写文件，全量上界面） |
 | `src/PlcMesBridge.Core/Modes/SingleMachineCoordinator.cs` | 单机业务：命令字边沿 + 4 分支 + MES 上传 + 统计 |
 | `src/PlcMesBridge.Core/Modes/MultiMachineGateway.cs` | 多机网关：触发→JSON→POST→回写 + Manager |
 | `src/PlcMesBridge.Core/Comms/` | `IPlcClient` + 真机 `MelsecPlcClient` + 模拟 `SimulatedPlcClient` |

@@ -5,13 +5,15 @@
 // 文件截 50 字（老项目 Substring(0,50) 原样），界面显示全量。
 // WPF 层统一落盘：Core 只发事件不碰文件（保持 Core 无 UI、无落盘策略）。
 // 线程安全：锁串行化，后台线程可直接调。
+//
+// 位置说明：纯逻辑无 WPF 依赖，故放 Core（可测，见 LocalLogServiceTests），
+// WPF 层只调 Write 搬运返回值上界面。
 // =========================================================================
 
-using System.IO;
 using System.Text;
 using PlcMesBridge.Core.Infrastructure;
 
-namespace PlcMesBridge.Services;
+namespace PlcMesBridge.Core.Services;
 
 public static class LocalLogService
 {

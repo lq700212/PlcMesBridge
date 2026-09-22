@@ -115,4 +115,17 @@ public static class MesLogger
                 ? new List<string>(list)
                 : new List<string>();
     }
+
+    /// <summary>
+    /// 清空内存缓存（仅测试用：静态缓存跨用例常驻，不清会导致用例互相污染。
+    /// 生产代码不要调——日志窗打开时要读历史）。
+    /// </summary>
+    public static void ClearForTests()
+    {
+        lock (LockObj)
+        {
+            SingleCache.Clear();
+            StationCaches.Clear();
+        }
+    }
 }

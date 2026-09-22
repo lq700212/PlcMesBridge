@@ -2,6 +2,31 @@
 
 > VB 老项目 1:1 复刻的 WPF 融合版。版本规则：关键行为变化即记一笔。
 
+## V0.0.3（2026-09-22，全量走查 + 测试加固 42→95）
+
+- 走查修 4 个 bug：
+  （1）`AppConfig.Load` 的 `DataLength` 用 `int.Parse`，ini 手改错一个字符
+  启动即崩——改为容错解析，非法/非正数回填 799；
+  （2）`IniFile.ReadInt/ReadByte` 自愈按 `"#0.000"` 写（如 "799.000"），
+  下次自己解析不了——改为纯整数写，自愈一次就好（`ReadDouble` 保持三位小数）；
+  （3）`StationGateway.ShiftAddr` 大小写敏感 + `int.Parse` 无保护——改为
+  大小写不敏感、非法地址返回原值不抛（合法输入与老项目逐字一致）；
+  （4）`MultiMachineManager.ConnectAll` 失败网关也进 `Stations`——改为当场
+  释放、不进列表（`Stations` 只收连上且线程已起的）。
+- `LocalLogService` 从 WPF 层搬进 `Core/Services`（纯逻辑无界面依赖，
+  按"业务进 Core"约定；`MainWindow` 只改 using，行为不变）。
+- `MesLogger` 新增 `ClearForTests()`（仅清内存缓存，供测试隔离，生产不调）。
+- 测试 42→95（新增 53 例，全部串行约 7s）：沉淀 `tests/.../Mocks/`
+  （`MesStubServer` 本地桩 MES + `PlcScenarios` 标准报文/单机预置 +
+  `TestScope` 静态全局快照恢复 + 落盘重定向临时目录，下次直接复用）；
+  新增 `AppConfigTests` 7 / `IniNumberFormatTests` 4 / `ShiftAddrRobustTests` 4 /
+  `MesLoggerTests` 5 / `LocalLogServiceTests` 4 / `SingleMachineEdgeTests` 9
+  （桩 MES 精确断言进站 ACTION=I、出站两次 POST）/ `GatewayExtendedTests` 10
+  （0031 拆包/HTTP500/空 URL/空格占位/双触发单次处理）/ `SimAndHttpTests` 8 /
+  `LanguageCoverageTests` 2（UI 常用键英文全覆盖）。
+- 验证：`dotnet build` 0 警告 0 错误，`dotnet test` 95/95（连跑两轮稳定），
+  GUI 冒烟（exe 存活 + config 自愈 + 建库）通过。
+
 ## V0.0.2（2026-09-22，界面设置切换模式）
 
 - 主窗新增"设置"按钮（单机/多机视图各一）：点击先弹登录窗

@@ -38,6 +38,7 @@ dotnet test tests/PlcMesBridge.Tests/PlcMesBridge.Tests.csproj --nologo
 
 - `src/PlcMesBridge.Core/` — 业务与基础（INI/SQLite/MES/通讯/单机/多机逻辑）
 - `src/PlcMesBridge/` — WPF 界面（主窗/调试/报警/日志/图片窗）
-- `tests/PlcMesBridge.Tests/` — 42 例 xUnit
+- `tests/PlcMesBridge.Tests/` — 95 例 xUnit（含 `Mocks/` 复用基建：本地桩 MES /
+  标准报文与单机预置 / 静态全局快照恢复，下次加用例直接复用）
 - `extern/kaleidoscope/` — 通讯子模块（独立仓库，勿直接改，见 AGENTS.md）
 - `config.sample.ini` — 现场配置样例

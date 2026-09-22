@@ -10,7 +10,7 @@ using PlcMesBridge.Core.Data;
 using PlcMesBridge.Core.Infrastructure;
 using PlcMesBridge.Core.Mes;
 using PlcMesBridge.Core.Modes;
-using PlcMesBridge.Services;
+using PlcMesBridge.Core.Services;
 
 namespace PlcMesBridge;
 
