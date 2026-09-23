@@ -107,21 +107,28 @@ public partial class MainWindow : Window
               (short)t.Hour, (short)t.Minute, (short)t.Second });
     }
 
-    /// <summary>菜单连接（按模式分发：单机走单机连接，多机走多机全连）。</summary>
-    private void MiConnect_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// 连接控件状态（单机走状态卡内按钮，多机走第二行按钮，两处不重复）。
+    /// </summary>
+    private void SetConnectUi(bool enabled, string text)
     {
         if (_single != null)
-            BtnConnect_Click(sender, e);
+        {
+            BtnConnectInline.IsEnabled = enabled;
+            BtnConnectInline.Content = text;
+        }
         else
-            BtnConnectM_Click(sender, e);
+        {
+            BtnConnectM.IsEnabled = enabled;
+            BtnConnectM.Content = text;
+        }
     }
 
     private void BtnConnect_Click(object sender, RoutedEventArgs e)
     {
         if (_single == null)
             return;
-        MiConnect.IsEnabled = false;
-        MiConnect.Header = "连接中...";
+        SetConnectUi(false, "连接中...");
         Task.Run(() =>
         {
             bool ok = _single.Connect(out _);
@@ -132,12 +139,11 @@ public partial class MainWindow : Window
                     // 复刻：连上后产品表变灰（老项目 DataGridView1.BackgroundColor=DarkGray）。
                     GridProducts.Background = Brushes.DarkGray;
                     StartSingleLoop();
-                    MiConnect.Header = LanguageService.Tr("连接PLC");
+                    SetConnectUi(false, LanguageService.Tr("连接PLC"));
                 }
                 else
                 {
-                    MiConnect.IsEnabled = true;
-                    MiConnect.Header = LanguageService.Tr("连接PLC");
+                    SetConnectUi(true, LanguageService.Tr("连接PLC"));
                     LbBeatLamp.Foreground = Brushes.Red;
                     MessageBox.Show(LanguageService.Tr("连接PLC失败"), "PLC",
                         MessageBoxButton.OK, MessageBoxImage.Error);
@@ -250,15 +256,14 @@ public partial class MainWindow : Window
     {
         if (_multi == null)
             return;
-        MiConnect.IsEnabled = false;
-        MiConnect.Header = "连接中...";
+        SetConnectUi(false, "连接中...");
         Task.Run(() =>
         {
             var (ok, skipped) = _multi.ConnectAll();
             Dispatcher.Invoke(() =>
             {
                 LocalLog($"连接完成：成功 {ok} 台，跳过 {skipped} 台", -1);
-                MiConnect.Header = LanguageService.Tr("连接设备");
+                SetConnectUi(false, LanguageService.Tr("连接设备"));
             });
         });
     }
@@ -327,8 +332,13 @@ public partial class MainWindow : Window
         Title = LanguageService.Tr("PLC通信");
         LbStatusTitle.Content = LanguageService.Tr("运行状态");
         LbStatsTitle.Content = LanguageService.Tr("统计信息");
-        MiConnect.Header = LanguageService.Tr(
-            AppConfig.Mode == RunMode.Single ? "连接PLC" : "连接设备");
+        // 操作入口：单机顶菜单（连接放状态卡内）；
+        // 多机顶菜单 + 第二行只放连接设备按钮。
+        bool single = AppConfig.Mode == RunMode.Single;
+        if (single)
+            BtnConnectInline.Content = LanguageService.Tr("连接PLC");
+        else
+            BtnConnectM.Content = LanguageService.Tr("连接设备");
         LbBeat.Content = LanguageService.Tr("PLC心跳");
         MiLog.Header = LanguageService.Tr("MES 交互实时日志");
         MiDebug.Header = LanguageService.Tr("MES 接口调试界面");

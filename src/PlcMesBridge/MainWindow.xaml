@@ -17,8 +17,6 @@
         <DockPanel Grid.Row="0" Background="{StaticResource FreshTopBarBrush}">
             <Menu x:Name="MainMenu" DockPanel.Dock="Left" VerticalAlignment="Center"
                   FontFamily="微软雅黑" FontSize="14" Background="Transparent">
-                <MenuItem x:Name="MiConnect" Header="连接PLC" Click="MiConnect_Click"
-                          Style="{StaticResource FreshMenuButton}"/>
                 <MenuItem x:Name="MiLog" Header="MES 交互实时日志" Click="BtnLog_Click"
                           Style="{StaticResource FreshMenuButton}"/>
                 <MenuItem x:Name="MiDebug" Header="MES 接口调试界面" Click="BtnDebug_Click"
@@ -49,6 +47,10 @@
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Label x:Name="LbBeat" Content="PLC心跳" VerticalAlignment="Center"/>
                             <Label x:Name="LbBeatLamp" Content="⚫" Foreground="Gray" VerticalAlignment="Center"/>
+                            <!--单机连接按钮（ heartbeat 灯右侧，间隙 16；主蓝按钮配浅蓝卡）-->
+                            <Button x:Name="BtnConnectInline" Content="连接PLC" Height="30"
+                                    Padding="16,2" Margin="16,0,0,0" VerticalAlignment="Center"
+                                    Click="BtnConnect_Click"/>
                         </StackPanel>
                         <Label x:Name="LbCuring" Content="固化时间: " VerticalAlignment="Center"/>
                         <Label x:Name="LbInTime" Content="进入时间: " VerticalAlignment="Center"/>
@@ -95,7 +97,9 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="6,4"
                         VerticalAlignment="Center" Background="{StaticResource FreshTopBarBrush}">
-                <Label Content="视图:" VerticalAlignment="Center" Margin="8,0,2,0"/>
+                <Button x:Name="BtnConnectM" Content="连接设备" Width="110" Height="32"
+                        Margin="4,2" VerticalAlignment="Center" Click="BtnConnectM_Click"/>
+                <Label Content="视图:" VerticalAlignment="Center" Margin="12,0,2,0"/>
                 <ComboBox x:Name="CmbView" Width="220" Height="30" VerticalAlignment="Center"
                           VerticalContentAlignment="Center"
                           SelectionChanged="CmbView_Changed"/>
