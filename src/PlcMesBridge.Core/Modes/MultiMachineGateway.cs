@@ -53,12 +53,16 @@ public class StationGateway : IDisposable
         _plc = plcFactory(stationId);
     }
 
-    /// <summary>连接本机台（老项目 Button1_Click 单台分支；PLCuse!=1 由 Manager 跳过）。</summary>
+    /// <summary>
+    /// 连接本机台（老项目 Button1_Click 单台分支；PLCuse!=1 由 Manager 跳过）。
+    /// IP/端口来自配置（PLC配置窗可改，改后点"连接设备"重连生效）。
+    /// </summary>
     public bool Connect(out string message)
     {
         _plc.Disconnect();
         string ip = AppConfig.PlcIps[_stationId];
-        if (_plc.Connect(ip, 6060))
+        int port = AppConfig.StationPorts[_stationId];
+        if (_plc.Connect(ip, port))
         {
             message = $"{LanguageService.Tr("连接PLC成功")},{ip}";
             StationLog?.Invoke(_stationId, message);

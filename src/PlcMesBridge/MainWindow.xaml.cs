@@ -91,17 +91,18 @@ public partial class MainWindow : Window
             SeedSimulation();
     }
 
-    /// <summary>模拟联调预置：库位 + 两个产品 + 固化 300s + 进入时间（开箱即有数）。</summary>
+    /// <summary>模拟联调预置：库位 + 两个产品 + 固化 + 进入时间（地址跟当前单机配置走）。</summary>
     private void SeedSimulation()
     {
-        if (_singlePlc is not SimulatedPlcClient sim)
+        if (_singlePlc is not SimulatedPlcClient sim || _single == null)
             return;
-        sim.PresetString("D30040", "SIM-KW01");
-        sim.PresetString("D3" + (1 * 40 + 10).ToString("D4"), "SIML0001");
-        sim.PresetString("D3" + (2 * 40 + 10).ToString("D4"), "SIMR0002");
-        sim.PresetInt32("D30005", new[] { 300 });
+        var cfg = _single.Cfg;
+        sim.PresetString(cfg.BinId, "SIM-KW01");
+        sim.PresetString(cfg.ProductAddr(1), "SIML0001");
+        sim.PresetString(cfg.ProductAddr(2), "SIMR0002");
+        sim.PresetInt32(cfg.Curing, new[] { 300 });
         var t = DateTime.Now;
-        sim.PresetWords("D30032", new short[]
+        sim.PresetWords(cfg.EntryTime, new short[]
             { (short)t.Year, (short)t.Month, (short)t.Day,
               (short)t.Hour, (short)t.Minute, (short)t.Second });
     }
@@ -220,7 +221,7 @@ public partial class MainWindow : Window
 
         _multi = new MultiMachineManager(id =>
             _useSim ? new SimulatedPlcClient()
-                    : new MelsecPlcClient(AppConfig.AsciiStations.Contains(id)));
+                    : new MelsecPlcClient(AppConfig.StationAscii[id]));
         _multi.StationLog += (id, m) => LocalLog(m, id);
         _multi.Heartbeat += (id, on) => Dispatcher.Invoke(() =>
             _panels[id].SetLive(on, false));
@@ -345,7 +346,7 @@ public partial class MainWindow : Window
         if (login.ShowDialog() != true)
             return;
         var settings = new SettingsWindow { Owner = this };
-        if (settings.ShowDialog() != true || !settings.ModeChanged)
+        if (settings.ShowDialog() != true || !settings.NeedsRestart())
             return;
         string? exe = Environment.ProcessPath;
         if (exe == null)

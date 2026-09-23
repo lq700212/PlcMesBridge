@@ -29,6 +29,9 @@ public sealed class TestScope : IDisposable
     private readonly string _baseDir;
     private readonly string[] _plcUse = new string[8];
     private readonly string?[] _plcIps = new string?[8];
+    private readonly int[] _stationPorts = new int[8];
+    private readonly bool[] _stationAscii = new bool[8];
+    private readonly SinglePlcConfig _single;
     private bool _disposed;
 
     /// <summary>本用例专属临时目录（ini/db/日志全放这里）。</summary>
@@ -57,6 +60,9 @@ public sealed class TestScope : IDisposable
         _baseDir = AppPaths.BaseDir;
         Array.Copy(AppConfig.PlcUse, _plcUse, 8);
         Array.Copy(AppConfig.PlcIps, _plcIps, 8);
+        Array.Copy(AppConfig.StationPorts, _stationPorts, 8);
+        Array.Copy(AppConfig.StationAscii, _stationAscii, 8);
+        _single = AppConfig.Single.Clone();
 
         // ---- 隔离：落盘全部重定向到临时目录 ----
         TempDir = Path.Combine(Path.GetTempPath(),
@@ -101,6 +107,9 @@ public sealed class TestScope : IDisposable
         AppConfig.PlcUse[6] = _plcUse[6]; AppConfig.PlcUse[7] = _plcUse[7];
         for (int i = 0; i < 8; i++)
             AppConfig.PlcIps[i] = _plcIps[i]!;
+        Array.Copy(_stationPorts, AppConfig.StationPorts, 8);
+        Array.Copy(_stationAscii, AppConfig.StationAscii, 8);
+        AppConfig.Single = _single.Clone();
         AppPaths.BaseDir = _baseDir;
         MesLogger.ClearForTests();
         try { Directory.Delete(TempDir, true); } catch { }

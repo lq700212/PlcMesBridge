@@ -15,6 +15,12 @@ public partial class SettingsWindow : Window
 {
     /// <summary>本次保存是否切换了模式（主窗据此决定是否自动重启）。</summary>
     public bool ModeChanged { get; private set; }
+
+    /// <summary>PLC 配置是否被改过（主窗据此决定是否自动重启）。</summary>
+    public bool PlcChanged { get; private set; }
+
+    /// <summary>任一配置变化都需重启生效（模式切换 / PLC 配置保存）。</summary>
+    public bool NeedsRestart() => ModeChanged || PlcChanged;
     public SettingsWindow()
     {
         InitializeComponent();
@@ -24,6 +30,7 @@ public partial class SettingsWindow : Window
         RbMulti.Content = LanguageService.Tr("多机通用网关");
         LbHint.Content = LanguageService.Tr("切换模式保存后自动重启软件");
         BtnSave.Content = LanguageService.Tr("保存");
+        BtnPlc.Content = LanguageService.Tr("PLC配置") + "...";
         BtnCancel.Content = LanguageService.Tr("取消");
         if (AppConfig.Mode == RunMode.Multi)
             RbMulti.IsChecked = true;
@@ -44,6 +51,17 @@ public partial class SettingsWindow : Window
         }
         DialogResult = true;
         Close();
+    }
+
+    /// <summary>
+    /// PLC 配置入口（已登录，无需二次验证）：打开 PLC 配置窗；
+    /// 若保存了配置，本窗也视为"需重启"，关闭后由主窗统一重启。
+    /// </summary>
+    private void BtnPlc_Click(object sender, RoutedEventArgs e)
+    {
+        var w = new PlcConfigWindow { Owner = this };
+        if (w.ShowDialog() == true && w.PlcChanged)
+            PlcChanged = true;
     }
 
     private void BtnCancel_Click(object sender, RoutedEventArgs e)

@@ -18,6 +18,8 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4">
             <Button x:Name="BtnSave" Content="保存" Width="100" Height="36"
                     Margin="4" Click="BtnSave_Click" IsDefault="True"/>
+            <Button x:Name="BtnPlc" Content="PLC配置..." Width="100" Height="36"
+                    Margin="4" Click="BtnPlc_Click"/>
             <Button x:Name="BtnCancel" Content="取消" Width="100" Height="36"
                     Margin="4" Click="BtnCancel_Click" IsCancel="True"
                     Style="{StaticResource FreshCancelButton}"/>

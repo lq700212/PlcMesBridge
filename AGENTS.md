@@ -63,7 +63,7 @@
 5. **SQL 一律参数化**：禁止字符串拼接 SQL（老项目残留的拼接只允许在
    `CureRecordStore` 内的固定语句，新增查询必须 `@参数`）。
 6. **改动后必须构建 + 测试全绿**：`dotnet build` 0 警告 0 错误，
-   `dotnet test` 33/33（基线只增不减）；禁止交付编译不过/测试不过的代码。
+   `dotnet test` 111/111（基线只增不减）；禁止交付编译不过/测试不过的代码。
 7. **机密红线**：`hsl.dat`（HSL 授权）只放 exe 同目录，已 ignore，
    **不得入库、不得外泄、不得写进任何文档**；源码禁止出现授权码明文。
 8. **配置样例同步**：新增配置键必须同步改 `config.sample.ini` + `AppConfig`
@@ -85,14 +85,15 @@
 | `src/PlcMesBridge/Controls/StationPanel.*` | 机台面板复用件（名+灯+日志，8 实例） |
 | `src/PlcMesBridge/MesDebugWindow.*` | 调试窗：5 接口表单 + API0033 扩展 + 预览上传 |
 | `src/PlcMesBridge/MesLogWindow.*` | 日志窗（-1 单机全量 / >=0 分机台，关窗退订） |
+| `src/PlcMesBridge/PlcConfigWindow.*` | PLC 配置窗（单机/多机/接口三页 + 测试连接 + 保存重启，逻辑在 Core） |
 | `src/PlcMesBridge/MesAlarmWindow.*` / `ImageWindow.*` | 报警窗 / 图片查看 |
 | `src/PlcMesBridge.Core/Services/LocalLogService.cs` | 本机操作日志落盘（截 50 字写文件，全量上界面） |
 | `src/PlcMesBridge.Core/Modes/SingleMachineCoordinator.cs` | 单机业务：命令字边沿 + 4 分支 + MES 上传 + 统计 |
 | `src/PlcMesBridge.Core/Modes/MultiMachineGateway.cs` | 多机网关：触发→JSON→POST→回写 + Manager |
-| `src/PlcMesBridge.Core/Comms/` | `IPlcClient` + 真机 `MelsecPlcClient` + 模拟 `SimulatedPlcClient` |
+| `src/PlcMesBridge.Core/Comms/` | `IPlcClient` + 真机 `MelsecPlcClient` + 模拟 `SimulatedPlcClient` + 连通测试 `PlcConnectionTester` |
 | `src/PlcMesBridge.Core/Mes/` | 模型/配置/日志/HTTP/参数记忆（16 字段） |
 | `src/PlcMesBridge.Core/Data/CureRecordStore.cs` | `PLCtable` CRUD + `ComputeStats` 纯统计 |
-| `src/PlcMesBridge.Core/Infrastructure/` | INI/SQLite/路径/语言/启动配置 |
+| `src/PlcMesBridge.Core/Infrastructure/` | INI/SQLite/路径/语言/启动配置/PLC 配置模型与校验 |
 | `tests/PlcMesBridge.Tests/` | 33 用例：冒烟4/基础6/统计4/单机7/MES层6/网关4/管理2 |
 
 ## 构建与验证命令
@@ -100,7 +101,7 @@
 ```powershell
 # 全量构建（0 警告 0 错误）
 dotnet build PlcMesBridge.slnx --nologo
-# 全量测试（33/33 全绿，串行，约 3s；含本地 HttpListener 桩 MES 端到端）
+# 全量测试（111/111 全绿，串行，约 9s；含本地 HttpListener 桩 MES 端到端）
 dotnet test tests/PlcMesBridge.Tests/PlcMesBridge.Tests.csproj --nologo
 # 子模块改动后（VS MSBuild，net472，原样沿用上游命令）
 & "D:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\MSBuild.exe" `

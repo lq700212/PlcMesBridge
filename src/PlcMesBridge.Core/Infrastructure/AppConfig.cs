@@ -28,11 +28,27 @@ public static class AppConfig
     /// <summary>8 台 PLC IP（键 PLCIP2/3/4/5/6/7/9/10，老项目跳号命名原样）。</summary>
     public static string[] PlcIps { get; private set; } = new string[8];
 
+    /// <summary>8 台端口（新键 [setting] PLCPorts，缺省全 6060，老项目全写死 6060）。</summary>
+    public static int[] StationPorts { get; private set; } =
+        new[] { 6060, 6060, 6060, 6060, 6060, 6060, 6060, 6060 };
+
+    /// <summary>
+    /// 8 台协议（新键 [setting] PLCAscii，缺省 1/2/5 号机 ASCII。
+    /// AsciiStations 是出厂缺省常量（供 PlcConfigStore 用），运行时以本数组为准。
+    /// </summary>
+    public static bool[] StationAscii { get; private set; } =
+        new[] { false, true, true, false, false, true, false, false };
+
+    /// <summary>
+    /// 单机全套 PLC 配置（新段 [SinglePLC]，缺省=老项目硬编码）。
+    /// internal 写：测试隔离（TestScope 快照恢复）用，生产只读。
+    /// </summary>
+    public static SinglePlcConfig Single { get; internal set; } = SinglePlcConfig.Default;
+
     /// <summary>ASCII 协议机台（老项目 i=1,2,5 用 MelsecMcAsciiNet，其余二进制）。</summary>
     public static readonly HashSet<int> AsciiStations = new() { 1, 2, 5 };
 
-    private static readonly string[] IpKeys =
-        { "PLCIP2", "PLCIP3", "PLCIP4", "PLCIP5", "PLCIP6", "PLCIP7", "PLCIP9", "PLCIP10" };
+    private static readonly string[] IpKeys = PlcConfigStore.IpKeys;
 
     private static readonly string[] DefaultUrls =
     {
@@ -75,6 +91,17 @@ public static class AppConfig
 
         for (int i = 0; i < 8; i++)
             PlcIps[i] = IniFile.ReadStr(ini, "setting", IpKeys[i], "127.0.0.1");
+
+        // 单机 + 多机端口/协议走 PlcConfigStore（自愈缺省，见 PlcConfig.cs）。
+        Single = PlcConfigStore.LoadSingle(ini);
+        StationPlcConfig[] stations = PlcConfigStore.LoadStations(ini);
+        for (int i = 0; i < 8; i++)
+        {
+            PlcUse[i] = stations[i].Enabled ? "1" : "0";
+            PlcIps[i] = stations[i].Ip;
+            StationPorts[i] = stations[i].Port;
+            StationAscii[i] = stations[i].UseAscii;
+        }
 
         MesConfig.UrlApi0027 = IniFile.ReadStr(ini, "MES", "Url_API0027", DefaultUrls[0]);
         MesConfig.UrlApi0028 = IniFile.ReadStr(ini, "MES", "Url_API0028", DefaultUrls[1]);

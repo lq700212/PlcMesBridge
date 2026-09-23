@@ -7,11 +7,12 @@
 //
 // 轮询节拍（老项目原样）：心跳 1s 翻转（D30010）；业务 200ms 一次；
 //   统计每 5 次业务轮询跑一次（约 1s）。
-// 命令字 D30001 边沿触发（old != new 才执行），完成后清 0 + D30011=1。
-// 4 分支：1 装载（读 160 产品→入库→进站上传）/ 2 卸载（固化+出站上传→删库）/
+// 命令字边沿触发（old != new 才执行），地址全来自 SinglePlcConfig
+// （缺省=老项目硬编码 D30001/D30011/…，PLC配置窗可改，改后重启生效）。
+// 4 分支：1 装载（读产品→入库→进站上传）/ 2 卸载（固化+出站上传→删库）/
 //   3 强制出料（同 2）/ 4 资料获取（查库回写 PLC + 回显）。
-// 产品地址：D3 + (i*40+10).ToString("D4")，读长 40；回写长 80。
-// MES 报警：写报警位（ini [setting] MESPLCALarm，缺省 D30013）+ AlarmRaised 事件。
+// 产品地址：Cfg.ProductAddr(i)（缺省 D3 前缀 + 50 起 + 40 步长 + D4 补零）；
+// MES 报警位来自配置（读链 新键→老 MESPLCALarm→D30013）+ AlarmRaised 事件。
 // =========================================================================
 
 using Newtonsoft.Json;
@@ -26,14 +27,17 @@ public class SingleMachineCoordinator : IDisposable
 {
     private readonly IPlcClient _plc;
     private readonly CureRecordStore _store;
-    private readonly string _iniPath;
+    private readonly SinglePlcConfig _cfg;
     private short _lastCmd;
     private short _live;
     private int _statsCounter;
     private bool _disposed;
 
-    public string Ip { get; private set; } = "192.168.1.80";
-    public int Port { get; private set; } = 6060;
+    /// <summary>PLC 配置（构造注入；缺省=老项目硬编码，见 PlcConfig.cs）。</summary>
+    public SinglePlcConfig Cfg => _cfg;
+
+    public string Ip => _cfg.Ip;
+    public int Port => _cfg.Port;
 
     // ---- UI 状态缓存（老项目 currentXXX 变量，供中英切换重绘）----
     public string CuringText { get; private set; } = "";
@@ -53,10 +57,16 @@ public class SingleMachineCoordinator : IDisposable
     public event Action<string, string>? AlarmRaised;
 
     public SingleMachineCoordinator(IPlcClient plc, CureRecordStore store, string? iniPath = null)
+        : this(plc, store, PlcConfigStore.LoadSingle(iniPath ?? AppPaths.ConfigIni))
+    {
+    }
+
+    /// <summary>配置注入构造（配置窗/测试用；传进来的对象会被克隆，外部改不影响运行中）。</summary>
+    public SingleMachineCoordinator(IPlcClient plc, CureRecordStore store, SinglePlcConfig cfg)
     {
         _plc = plc;
         _store = store;
-        _iniPath = iniPath ?? AppPaths.ConfigIni;
+        _cfg = (cfg ?? SinglePlcConfig.Default).Clone();
     }
 
     /// <summary>连接（老项目 Button1_Click；成功调用方起节拍器，失败 UI 弹框）。</summary>
@@ -76,35 +86,35 @@ public class SingleMachineCoordinator : IDisposable
 
     public void SetEndpoint(string ip, int port)
     {
-        Ip = ip;
-        Port = port;
+        _cfg.Ip = ip;
+        _cfg.Port = port;
     }
 
-    /// <summary>心跳 1s（老项目 TimerLive_Tick：灯翻转 + D30010）。返回灯状态供 UI。</summary>
+    /// <summary>心跳 1s（老项目 TimerLive_Tick：灯翻转 + 心跳地址）。返回灯状态供 UI。</summary>
     public bool TickLive()
     {
         _live = _live == 0 ? (short)1 : (short)0;
-        _plc.WriteInt16("D30010", _live);
+        _plc.WriteInt16(_cfg.Live, _live);
         return _live == 1;
     }
 
     /// <summary>业务轮询一次（老项目 TimerScan_Tick 全量，200ms 调一次）。</summary>
     public void TickScan()
     {
-        var (ghOk, gh) = _plc.ReadInt32("D30005", 2);
+        var (ghOk, gh) = _plc.ReadInt32(_cfg.Curing, 2);
         if (ghOk && gh != null && gh.Length > 0)
         {
             LastCuringSeconds = gh[0];
             CuringText = $"{gh[0]}s";
         }
 
-        var (tOk, tm) = _plc.ReadInt16("D30032", 6);
+        var (tOk, tm) = _plc.ReadInt16(_cfg.EntryTime, 6);
         if (tOk && tm != null && tm.Length >= 6)
         {
             InTimeText = $"{tm[0]}-{tm[1]:D2}-{tm[2]:D2} {tm[3]:D2}:{tm[4]:D2}:{tm[5]:D2}";
         }
 
-        var (cOk, cmdArr) = _plc.ReadInt16("D30001", 1);
+        var (cOk, cmdArr) = _plc.ReadInt16(_cfg.Cmd, 1);
         short cmd = cOk && cmdArr != null && cmdArr.Length > 0 ? cmdArr[0] : _lastCmd;
 
         if (cOk && _lastCmd != cmd)
@@ -133,9 +143,9 @@ public class SingleMachineCoordinator : IDisposable
     internal void HandleLoad()
     {
         StatusKey = "物料装载";
-        _plc.WriteInt16("D30001", 0);
+        _plc.WriteInt16(_cfg.Cmd, 0);
         var now = DateTime.Now;
-        _plc.WriteInt16("D30014", new short[]
+        _plc.WriteInt16(_cfg.PcTime, new short[]
             { (short)now.Year, (short)now.Month, (short)now.Day,
               (short)now.Hour, (short)now.Minute, (short)now.Second });
 
@@ -145,11 +155,11 @@ public class SingleMachineCoordinator : IDisposable
 
         if (!string.IsNullOrEmpty(kw))
         {
-            var ps = new List<string>(160);
-            for (int i = 1; i <= 160; i++)
+            var ps = new List<string>(_cfg.ProdCount);
+            for (int i = 1; i <= _cfg.ProdCount; i++)
             {
-                string addr = "D3" + (i * 40 + 10).ToString("D4");
-                var (ok, s) = _plc.ReadString(addr, 40);
+                string addr = _cfg.ProductAddr(i);
+                var (ok, s) = _plc.ReadString(addr, (ushort)_cfg.ProdReadLen);
                 string ret = ok ? (s ?? string.Empty).Replace("\0", string.Empty) : string.Empty;
                 ps.Add(ret);
             }
@@ -164,7 +174,7 @@ public class SingleMachineCoordinator : IDisposable
         {
             LogMessage?.Invoke($"{LanguageService.Tr("物料装载")},{LanguageService.Tr("库位ID为空")}");
         }
-        _plc.WriteInt16("D30011", 1);
+        _plc.WriteInt16(_cfg.Done, 1);
     }
 
     /// <summary>分支2 物料卸载（老项目 Case 2 原样：先查库上传，再删库）。</summary>
@@ -172,7 +182,7 @@ public class SingleMachineCoordinator : IDisposable
     {
         StatusKey = "物料卸载";
         LogMessage?.Invoke(LanguageService.Tr("物料卸载"));
-        _plc.WriteInt16("D30001", 0);
+        _plc.WriteInt16(_cfg.Cmd, 0);
         string kw = ReadBinId();
         BinIdText = kw;
         LogMessage?.Invoke($"{LanguageService.Tr("库位ID: ")}{kw}");
@@ -185,7 +195,7 @@ public class SingleMachineCoordinator : IDisposable
         {
             LogMessage?.Invoke($"{LanguageService.Tr("物料卸载")},{LanguageService.Tr("库位ID为空")}");
         }
-        _plc.WriteInt16("D30011", 1);
+        _plc.WriteInt16(_cfg.Done, 1);
     }
 
     /// <summary>分支3 强制出料（老项目 Case 3：同卸载亦上报）。</summary>
@@ -193,7 +203,7 @@ public class SingleMachineCoordinator : IDisposable
     {
         StatusKey = "强制出料";
         LogMessage?.Invoke(LanguageService.Tr("强制出料"));
-        _plc.WriteInt16("D30001", 0);
+        _plc.WriteInt16(_cfg.Cmd, 0);
         string kw = ReadBinId();
         BinIdText = kw;
         LogMessage?.Invoke($"{LanguageService.Tr("库位ID: ")}{kw}");
@@ -206,14 +216,14 @@ public class SingleMachineCoordinator : IDisposable
         {
             LogMessage?.Invoke($"{LanguageService.Tr("强制出料")},{LanguageService.Tr("库位ID为空")}");
         }
-        _plc.WriteInt16("D30011", 1);
+        _plc.WriteInt16(_cfg.Done, 1);
     }
 
     /// <summary>分支4 资料获取（老项目 Case 4：查库→逐条回写 PLC→回显表格）。</summary>
     internal void HandleFetch()
     {
         StatusKey = "资料获取";
-        _plc.WriteInt16("D30001", 0);
+        _plc.WriteInt16(_cfg.Cmd, 0);
         string kw = ReadBinId();
         BinIdText = kw;
         LogMessage?.Invoke($"{LanguageService.Tr("库位ID: ")}{kw}");
@@ -226,13 +236,13 @@ public class SingleMachineCoordinator : IDisposable
                 LogMessage?.Invoke($"{LanguageService.Tr("资料获取")}," +
                     $"{LanguageService.Tr("库位ID=")}{kw},{LanguageService.Tr("产品ID=")}{pid}");
                 string[] ps = pid.Split('⚫');
-                var echo = new List<string>(160);
-                for (int i = 1; i <= 160; i++)
+                var echo = new List<string>(_cfg.ProdCount);
+                for (int i = 1; i <= _cfg.ProdCount; i++)
                 {
-                    string addr = "D3" + (i * 40 + 10).ToString("D4");
+                    string addr = _cfg.ProductAddr(i);
                     if (i <= ps.Length)
                     {
-                        _plc.WriteString(addr, ps[i - 1], 80);
+                        _plc.WriteString(addr, ps[i - 1], _cfg.ProdWriteLen);
                         echo.Add(ps[i - 1]);
                     }
                     else
@@ -252,12 +262,12 @@ public class SingleMachineCoordinator : IDisposable
         {
             LogMessage?.Invoke($"{LanguageService.Tr("资料获取")},{LanguageService.Tr("库位ID为空")}");
         }
-        _plc.WriteInt16("D30011", 1);
+        _plc.WriteInt16(_cfg.Done, 1);
     }
 
     private string ReadBinId()
     {
-        var (ok, s) = _plc.ReadString("D30040", 10);
+        var (ok, s) = _plc.ReadString(_cfg.BinId, (ushort)_cfg.BinLen);
         return ok ? (s ?? string.Empty).Replace("\0", string.Empty) : string.Empty;
     }
 
@@ -378,13 +388,15 @@ public class SingleMachineCoordinator : IDisposable
         }
     }
 
-    /// <summary>报警：写 PLC 报警位 + 事件（UI 弹窗，老项目 TriggerPLCAlarm 原样）。</summary>
+    /// <summary>
+    /// 报警：写 PLC 报警位 + 事件（UI 弹窗，老项目 TriggerPLCAlarm 原样）。
+    /// 地址来自配置（读链 新键→老 MESPLCALarm→D30013，见 PlcConfigStore）。
+    /// </summary>
     internal void TriggerPlcAlarm(string errMsg)
     {
         try
         {
-            string addr = IniFile.ReadStr(_iniPath, "setting", "MESPLCALarm", "D30013");
-            _plc.WriteInt16(addr, 1);
+            _plc.WriteInt16(_cfg.Alarm, 1);
             AlarmRaised?.Invoke(errMsg, "MES Error");
             LogMessage?.Invoke($"MES 报警触发: {errMsg}");
         }

@@ -32,13 +32,17 @@ dotnet test tests/PlcMesBridge.Tests/PlcMesBridge.Tests.csproj --nologo
 - 主窗（单机/多机视图）均有"设置"按钮 → 登录窗（admin/123456，
   可勾"记住密码"下次预填） → 设置窗单机/多机二选一 → 保存：
   模式变了自动重启生效，没变只提示已保存。
+- 设置窗 → "PLC配置..." → PLC 配置窗（三页：单机PLC / 多机PLC /
+  接口地址）：IP/端口/命令地址全界面改，"测试连接"拿表单值直测
+  （不用先保存），"保存并重启"先校验格式、错当场拦，通过后自动重启生效。
+  去现场只点鼠标，不改代码不改 ini。
 - 风格：天蓝色小清新全局样式（`src/PlcMesBridge/Styles/FreshBlue.xaml`）。
 
 ## 目录
 
 - `src/PlcMesBridge.Core/` — 业务与基础（INI/SQLite/MES/通讯/单机/多机逻辑）
 - `src/PlcMesBridge/` — WPF 界面（主窗/调试/报警/日志/图片窗）
-- `tests/PlcMesBridge.Tests/` — 95 例 xUnit（含 `Mocks/` 复用基建：本地桩 MES /
+- `tests/PlcMesBridge.Tests/` — 111 例 xUnit（含 `Mocks/` 复用基建：本地桩 MES /
   标准报文与单机预置 / 静态全局快照恢复，下次加用例直接复用）
 - `extern/kaleidoscope/` — 通讯子模块（独立仓库，勿直接改，见 AGENTS.md）
 - `config.sample.ini` — 现场配置样例
