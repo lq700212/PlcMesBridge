@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using PlcMesBridge.Core.Infrastructure;
 
@@ -32,6 +33,7 @@ public partial class SettingsWindow : Window
         BtnSave.Content = LanguageService.Tr("保存");
         BtnPlc.Content = LanguageService.Tr("PLC配置") + "...";
         BtnCancel.Content = LanguageService.Tr("取消");
+        BtnShortcut.Content = LanguageService.Tr("创建桌面快捷方式");
         if (AppConfig.Mode == RunMode.Multi)
             RbMulti.IsChecked = true;
         else
@@ -68,5 +70,35 @@ public partial class SettingsWindow : Window
     {
         DialogResult = false;
         Close();
+    }
+
+    /// <summary>
+    /// 创建桌面快捷方式（本地小文件写，毫秒级，UI 线程直接做，不违反"UI 禁网络 IO"铁律）。
+    /// 路径逻辑在 Core.DesktopShortcut（可测），本窗只做"事件→控件"搬运：
+    /// 取当前 exe 全路径 + 桌面目录 → 调 EnsureOnDesktop → 按结果弹提示。
+    /// </summary>
+    private void BtnShortcut_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // net8 取当前 exe 全路径（单文件/普通发布都准；极端拿不到才回退基址拼进程名）。
+            string exePath = Environment.ProcessPath
+                ?? Path.Combine(AppPaths.BaseDir,
+                    System.Diagnostics.Process.GetCurrentProcess().ProcessName + ".exe");
+            string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var (result, path) = DesktopShortcut.EnsureOnDesktop(exePath, desktop);
+            string msg = result == ShortcutResult.Created
+                ? LanguageService.Tr("桌面快捷方式已创建") + "\n" + path
+                : LanguageService.Tr("桌面快捷方式已存在") + "\n" + path;
+            MessageBox.Show(msg, LanguageService.Tr("设置"),
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            // COM 被禁/桌面不可写等：原样报原因，不吞异常（方便现场排查）。
+            MessageBox.Show(LanguageService.Tr("发生错误:") + ex.Message,
+                LanguageService.Tr("设置"),
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 }

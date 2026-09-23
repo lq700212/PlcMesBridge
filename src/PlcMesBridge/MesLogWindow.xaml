@@ -1,6 +1,7 @@
 <Window x:Class="PlcMesBridge.MesLogWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="Assets/app.ico"
         Title="MES 交互实时日志" Width="784" Height="561" Topmost="True">
     <!--日志窗（1:1 FormMESLogView：历史缓存一次性加载 + 订阅实时事件，关窗退订）。
         stationId=-1 单机全量；>=0 只看本机台（老项目 New(index) 语义）。-->

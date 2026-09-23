@@ -36,12 +36,16 @@ dotnet test tests/PlcMesBridge.Tests/PlcMesBridge.Tests.csproj --nologo
   接口地址）：IP/端口/命令地址全界面改，"测试连接"拿表单值直测
   （不用先保存），"保存并重启"先校验格式、错当场拦，通过后自动重启生效。
   去现场只点鼠标，不改代码不改 ini。
+- 设置窗 → "创建桌面快捷方式"：一键在桌面建 `.lnk`（图标取 exe 内嵌图标，
+  已存在不覆盖只提示路径）。exe/任务栏/全部 8 个窗体左上角图标统一为
+  `src/PlcMesBridge/Assets/app.ico`，换图标只换该文件重新编译。
 - 风格：天蓝色小清新全局样式（`src/PlcMesBridge/Styles/FreshBlue.xaml`）。
 
 ## 目录
 
 - `src/PlcMesBridge.Core/` — 业务与基础（INI/SQLite/MES/通讯/单机/多机逻辑）
-- `src/PlcMesBridge/` — WPF 界面（主窗/调试/报警/日志/图片窗）
+- `src/PlcMesBridge/` — WPF 界面（主窗/调试/报警/日志/图片窗），
+  图标在 `Assets/`（`app.ico` 程序图标 / `app.png` 高清源备用）
 - `tests/PlcMesBridge.Tests/` — 111 例 xUnit（含 `Mocks/` 复用基建：本地桩 MES /
   标准报文与单机预置 / 静态全局快照恢复，下次加用例直接复用）
 - `extern/kaleidoscope/` — 通讯子模块（独立仓库，勿直接改，见 AGENTS.md）

@@ -2,6 +2,18 @@
 
 > VB 老项目 1:1 复刻的 WPF 融合版。版本规则：关键行为变化即记一笔。
 
+## V0.0.6（2026-09-23，程序图标三件套）
+
+- 图标归位 `src/PlcMesBridge/Assets/`（根目录 `app.ico`/`app.png` 迁入；
+  `app.ico` 256 程序图标，`app.png` 800 高清源备用）：exe 文件/任务栏图标
+  走 csproj `ApplicationIcon`，8 个窗体左上角走 `Icon="Assets/app.ico"` 资源。
+- 设置窗新增"创建桌面快捷方式"：一键建桌面 `.lnk`（图标取 exe 内嵌图标，
+  换图标重编即跟新；已存在不覆盖），逻辑进 Core（`DesktopShortcut` 纯函数 +
+  WScript late-bound COM，可测），WPF 只搬运。
+- 测试 111→115：`DesktopShortcutTests` 4（命名/兜底/图标指向/新建+不覆盖，
+  临时目录真建 `.lnk`，不碰真实桌面）；`LanguageCoverageTests` 追加 3 新键。
+- 验证：构建 0 警告 0 错误，测试 115/115，GUI 冒烟通过。
+
 ## V0.0.5（2026-09-23，主窗菜单栏布局）
 
 - 主窗操作入口按模式分家：单机顶菜单（日志/调试/语言/设置）+

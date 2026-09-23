@@ -1,6 +1,7 @@
 <Window x:Class="PlcMesBridge.PlcConfigWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="Assets/app.ico"
         Title="PLC配置" Width="640" Height="560"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <!--PLC 配置窗（三页：单机 / 多机 / 接口地址；填表→测试连接变绿→保存重启）。

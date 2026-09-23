@@ -1,6 +1,7 @@
 <Window x:Class="PlcMesBridge.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="Assets/app.ico"
         Title="登录" Width="340" Height="290"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <!--登录窗（设置按钮门禁：用户名+密码，正确才进设置窗；模态）。

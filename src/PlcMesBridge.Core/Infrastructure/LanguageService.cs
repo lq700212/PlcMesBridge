@@ -165,6 +165,10 @@ public static class LanguageService
         ["设置已保存，重启软件后生效"] = "Settings saved, restart to take effect",
         ["请登录后进入设置"] = "Please login to open settings",
         ["记住密码"] = "Remember me",
+        // ---- 桌面快捷方式（设置窗一键创建，图标三件套之一）----
+        ["创建桌面快捷方式"] = "Create Desktop Shortcut",
+        ["桌面快捷方式已创建"] = "Desktop shortcut created",
+        ["桌面快捷方式已存在"] = "Desktop shortcut already exists",
         // ---- PLC 配置窗（V0.0.4 新增，现场点鼠标配 PLC 用）----
         ["PLC配置"] = "PLC Config",
         ["单机PLC"] = "Single PLC",
