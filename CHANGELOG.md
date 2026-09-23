@@ -2,6 +2,28 @@
 
 > VB 老项目 1:1 复刻的 WPF 融合版。版本规则：关键行为变化即记一笔。
 
+## V0.0.12（2026-09-23，XAML 设计时纪律入 AGENTS）
+
+- AGENTS.md 代码约定新增"XAML 设计时纪律"（V0.0.11 教训固化）：
+  新建/改动任何 Window/UserControl 必带 `d:DataContext` +
+  展示文本 `FallbackValue` + `Visibility`/数值 `FallbackValue`
+  （同格多视图只留一个 Visible），改完重开设计器确认预览≈运行。
+- 验证：文档改动，无需构建测试（V0.0.11 已验证构建 0 警告 0 错误，测试 133/133）。
+
+## V0.0.11（2026-09-23，XAML 设计时预览修复）
+
+- 修设计器预览与运行不一致：全仓 XAML 纯 `{Binding}` 且无设计时
+  DataContext，设计器里 DataContext 为空→绑定全失败→控件无文本；
+  主窗单机/多机两视图绑定失败后取 Visibility 缺省值 Visible 而非折叠，
+  在同一格重叠，按钮看起来"叠在一起"（运行因 VM 注入真值故正常）。
+- 10 个 XAML（9 窗 + StationPanel）加 `d:DataContext`（DesignInstance，
+  IsDesignTimeCreatable=False，只给智能提示）+ 展示文本补
+  `FallbackValue`（取各 VM 中文默认文案，预览≈运行；mc:Ignorable=d，
+  运行时零影响）；单机视图 FallbackValue=Visible、多机视图
+  FallbackValue=Collapsed，设计器只显单机视图不再重叠；
+  UniformGrid 列数 FallbackValue=4。
+- 验证：构建 0 警告 0 错误，测试 133/133。
+
 ## V0.0.10（2026-09-23，设置下拉修复 + 弹窗居中）
 
 - 修设置下拉子项全空、点不了：子项在 Popup 独立视觉树里，

@@ -81,6 +81,15 @@
   `tests/.../Mocks/FakeDialogService` 桩）。VM 禁止直接 new Window/
   MessageBox/Dispatcher；PasswordBox 密码经事件转交（不可绑定，官方
   workaround）；关窗确认/重启经服务。
+- **XAML 设计时纪律（新建/改动任何 Window/UserControl 必守，否则预览与运行分叉）**：
+  根节点加 `xmlns:d/mc/vm` + `mc:Ignorable="d"` +
+  `d:DataContext="{d:DesignInstance Type=vm:对应ViewModel, IsDesignTimeCreatable=False}"`；
+  所有展示文本绑定（Title/Header/Content/Label/灯色）加 `FallbackValue`
+  （取 VM 中文默认文案，`mc:Ignorable=d` 保证运行时零影响；输入框/运行时
+  数据不加）；`Visibility` 绑定必须给 `FallbackValue` 且同格多视图只留一个
+  `Visible`、其余 `Collapsed`（绑定失败取缺省 Visible 会重叠，即"按钮叠在一起"
+  的根因）；数值绑定（如 UniformGrid 列数）同样给 FallbackValue。
+  改完关掉重开设计器看一眼，预览≈运行才算完（教训见 CHANGELOG V0.0.11）。
 - 业务逻辑进 `Core`（可测）；新增业务分支必须先补 `Tests` 用例
   （模拟 PLC + 本地 HttpListener 桩 MES，基建现成）；新增 VM 编排补
   `ViewModelTests` 用例（Fake 服务 + TestScope 隔离）。
