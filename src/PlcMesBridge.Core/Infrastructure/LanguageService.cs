@@ -194,6 +194,8 @@ public static class LanguageService
         ["全部测试"] = "Test All",
         ["测试中..."] = "Testing...",
         ["测试用表单值直测保存后重启生效"] = "Tests use form values directly; saving restarts the app to apply",
+        ["运行状态"] = "Run Status",
+        ["统计信息"] = "Statistics",
         ["连接成功"] = "Connected",
         ["连接失败"] = "Connection failed",
         ["保存并重启"] = "Save & Restart",

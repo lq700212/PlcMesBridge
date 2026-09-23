@@ -3,6 +3,10 @@
      白底 + 微软雅黑 + DodgerBlue 主按钮(DimGray 取消) + 浅蓝提示条。
      App.xaml 全局合并，默认 Button 即主按钮样式，各窗体无需逐个指定。
      新增样式键必须同步更新本文件头注释（键名 + 用途）。
+     样式键：FreshPrimaryButton（主按钮）/ FreshCancelButton（取消按钮）/
+     FreshHintBorder（浅蓝提示条）/ FreshTopBarBrush（顶栏底色）/
+     FreshMenuButton（顶菜单栏小药丸按钮：白底浅蓝边，悬停变蓝白字）/
+     FreshCardBorder（白底卡片：白底浅蓝边，与浅蓝 FreshHintBorder 配对分区）。
      ===================================================================== -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -116,6 +120,15 @@
         </Setter>
     </Style>
 
+    <!-- ============ 白底卡片（与浅蓝提示条配对：两区并排/上下时一眼区分） ============ -->
+    <Style x:Key="FreshCardBorder" TargetType="Border">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FreshLightBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="10,8"/>
+    </Style>
+
     <!-- ============ 浅蓝提示条（背景#EEF5FF + 边框#D6E5FF，深蓝字另行指定） ============ -->
     <Style x:Key="FreshHintBorder" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource FreshLightBgBrush}"/>
@@ -127,4 +140,49 @@
 
     <!-- ============ 顶栏底色（浅蓝通栏，内容控件保持白底可读） ============ -->
     <SolidColorBrush x:Key="FreshTopBarBrush" Color="{StaticResource FreshLightBg}"/>
+
+    <!-- ============ 顶菜单小药丸按钮（白底+浅蓝边+深蓝字，悬停变蓝白字） ============ -->
+    <Style x:Key="FreshMenuButton" TargetType="MenuItem">
+        <Setter Property="FontFamily" Value="微软雅黑"/>
+        <Setter Property="Foreground" Value="{StaticResource FreshPrimaryDeepBrush}"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FreshLightBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="14,6"/>
+        <Setter Property="Margin" Value="3"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter ContentSource="Header"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter Property="Background"
+                                    Value="{StaticResource FreshPrimaryBrush}"/>
+                            <Setter Property="BorderBrush"
+                                    Value="{StaticResource FreshPrimaryDarkBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background"
+                                    Value="{StaticResource FreshPrimaryDeepBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>
