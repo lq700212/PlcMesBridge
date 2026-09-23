@@ -2,6 +2,74 @@
 
 > VB 老项目 1:1 复刻的 WPF 融合版。版本规则：关键行为变化即记一笔。
 
+## V0.0.10（2026-09-23，设置下拉修复 + 弹窗居中）
+
+- 修设置下拉子项全空、点不了：子项在 Popup 独立视觉树里，
+  `RelativeSource AncestorType=Window` 全灭（Header/Command 绑不上），
+  改直接绑 VM（DataContext 走逻辑树继承不受影响），dev 的 PLC设置
+  同一根因一并恢复。新增 `FreshMenuSubItem` 子项样式（悬停整行变蓝白字，
+  与顶栏药丸呼应；未登录置灰靠它）。
+- 弹窗统一屏幕居中：`DialogService` 加 `Prep` 给所有新窗挂主窗 Owner
+  （CenterOwner 有主可依；非模态窗关主窗跟着收不残留），
+  `MesLogWindow` 补 `CenterScreen`（之前唯一缺启动位置的）。
+- 验证：人工测试通过（设置下拉文本/高亮/可点、dev 三项、弹窗居中）。
+
+## V0.0.9（2026-09-23，全量 MVVM：View 绑定 + VM 编排 + 服务开窗）
+
+- 确认旧架构不是 MVVM（全仓无 ViewModel/INPC/ICommand/DataContext），
+  9 个窗 + 1 控件一次迁完，无双风格尾巴；Core 业务与行为零变化。
+- 新 `ViewModels/` 基建：`ViewModelBase`（INPC + `UiInvoke` 跨线程封送，
+  后台节拍/网关更新属性不跨线程崩）+ `RelayCommand` +
+  `IDialogService`（VM 开窗/提示唯一出口，生产 `DialogService`，
+  测试 `FakeDialogService` 桩）。
+- 主窗 VM 化最重：双视图绑定显隐、160 行产品表、8 面板 VM、后台节拍、
+  时钟 Timer、菜单门禁全进 `MainWindowViewModel`；xaml.cs 只剩
+  DataContext + 转发关窗。PLC 窗三页改 ItemsControl 绑定
+  （行内按钮经 RelativeSource 找父 VM 命令）；PasswordBox 经事件转交
+  （不可绑定的官方 workaround）；`StationPanel` 的 VM 由主窗注入。
+- 测试 126→133：新增 `ViewModelTests` 7（登录失败/跟随、模式保存、
+  主窗门禁拦放、退出清态、改密码规则/代改显隐；Fake 服务 +
+  TestScope 隔离）；测试工程增引主工程（只用 ViewModels，不建窗）。
+- 验证：构建 0 警告 0 错误，测试 133/133，UIA 端到端
+  （启动→dev 登录→菜单回显→设置下拉三项）通过。
+
+## V0.0.8（2026-09-23，密码真正安全：SQLite 账号体系 + PBKDF2 + DPAPI）
+
+- 明文密码彻底清零：代码里不再有密码常量（`AdminPassword`/`DevPassword`
+  删除），ini 里不再存明文（旧 `RememberLogin`/`SavedPwd` 系键启动时清扫）。
+- 新 `Core/Security/`：`PasswordHasher`（PBKDF2-SHA256 12 万次迭代 +
+  独立盐 + Pepper，恒定时间比对；新密码≥6 位、不得与旧相同）、
+  `UserAccountStore`（`users` 表与 PLCtable 同库，全参数化；
+  空表播种一次，已改密码永不覆盖；未知用户与密码错同回 None，防枚举）、
+  `RememberMeProtector`（记住密码走 Windows DPAPI CurrentUser 加密，
+  P/Invoke crypt32 零新包，ini 只存 Base64 密文）。
+- 登录窗校验改走账号体系；"设置"下拉新增"修改密码"（自己改自己，
+  dev 可下拉代改他人）；App 启动播种 + 清扫旧明文键。
+- 初始密码只在 App 启动播种处出现一次，上线前必须修改，文档不记录明文。
+- 测试 116→126：新增 `SecurityTests` 9（盐唯一/验对错/规则/播种/
+  全拒绝/库无明文/改密全流程/代改/重播不覆盖/DPAPI 往返），
+  记忆用例加"ini 无明文""旧键清扫"2 例。
+- 验证：构建 0 警告 0 错误，测试 126/126，GUI 冒烟通过。
+
+## V0.0.7（2026-09-23，菜单栏：运行模式独立 + 设置下拉 + 双账号登录）
+
+- 菜单栏新增"运行模式"独立按钮：登录后点击弹模式切换窗
+  （单机/多机二选一，保存写 ini，变了自动重启；逻辑与旧设置窗内切换一致）。
+- "设置"改为下拉：admin 见"修改密码" + "创建桌面快捷方式"，
+  dev 另见"PLC设置"（PLC 配置窗直开，保存后自动重启；
+  未登录点子项先提示登录）。
+  修 bug：顶菜单小药丸样式把 MenuItem 模板换成纯 Header、无 Popup，
+  有子项也展不开——"设置"改用带 Popup 的 `FreshMenuDropButton` 样式
+  （同外观 + 右下箭头 + 子项下拉，UI 自动化真实点击验证展开正常）。
+- 新增菜单栏"登录"按钮：两档账号 admin（普通管理）、dev（最高权限）；"记住密码"按账号各记各的，用户名框改谁就跟出谁的密码；
+  已登录再点可退出或切换账号，按钮回显当前用户名。
+- 旧 `SettingsWindow` 删除（模式部分由 `ModeSwitchWindow` 接替，
+  快捷方式逻辑搬进主窗 `MiShortcut_Click`）；`RunModeSettings` 删密码常量
+  与全部老记忆键兼容分支（项目未上线，不留迁移包袱；
+  登录校验后移 SQLite 账号体系，见 V0.0.8）。
+- 测试 115→116：登录用例改角色断言，新增记住密码跟随账号
+  （分账号存取、取消只清自己）1 例；中英覆盖在原用例内追加 7 新键。
+
 ## V0.0.6（2026-09-23，程序图标三件套）
 
 - 图标归位 `src/PlcMesBridge/Assets/`（根目录 `app.ico`/`app.png` 迁入；
@@ -74,7 +142,7 @@
 ## V0.0.2（2026-09-22，界面设置切换模式）
 
 - 主窗新增"设置"按钮（单机/多机视图各一）：点击先弹登录窗
-  （账号 admin / 密码 123456，本地防误触），通过后弹设置窗。
+  （本地防误触门禁），通过后弹设置窗。
 - 设置窗单机/多机二选一，保存写入 `config.ini [setting] Mode`，
   模式变了主窗自动重启（先拉新进程再退当前进程，并跳过"是否退出"确认，
   否则确认框卡住旧进程会双开；没变只提示已保存）。

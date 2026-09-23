@@ -148,7 +148,7 @@ public static class LanguageService
         ["实测值"] = "Actual Value",
         ["标准值"] = "Standard Value",
         ["上限"] = "Max Limit",
-        // ---- 设置窗（登录门禁 + 运行模式切换，V0.0.2 新增）----
+        // ---- 登录 + 运行模式切换（V0.0.2 起，菜单栏独立按钮）----
         ["设置"] = "Settings",
         ["登录"] = "Login",
         ["用户名"] = "Username",
@@ -163,12 +163,33 @@ public static class LanguageService
         ["切换模式保存后自动重启软件"] = "Saving a mode change restarts the app automatically",
         ["设置已保存"] = "Settings saved",
         ["设置已保存，重启软件后生效"] = "Settings saved, restart to take effect",
-        ["请登录后进入设置"] = "Please login to open settings",
         ["记住密码"] = "Remember me",
+        ["需要 dev 权限"] = "Requires dev privileges",
         // ---- 桌面快捷方式（设置窗一键创建，图标三件套之一）----
         ["创建桌面快捷方式"] = "Create Desktop Shortcut",
         ["桌面快捷方式已创建"] = "Desktop shortcut created",
         ["桌面快捷方式已存在"] = "Desktop shortcut already exists",
+        // ---- 菜单栏：运行模式独立按钮 + 设置下拉 + 登录按钮（双账号门禁）----
+        ["PLC设置"] = "PLC Settings",
+        ["请先登录"] = "Please login first",
+        ["请登录"] = "Please login",
+        ["切换/退出"] = "Switch/Logout",
+        ["当前已登录"] = "Logged in as",
+        ["是否退出登录？（点否则切换账号）"] = "Logout? (No = switch account)",
+        // ---- 修改密码窗（设置下拉，登录后可进）----
+        ["修改密码"] = "Change Password",
+        ["账号"] = "Account",
+        ["旧密码"] = "Old Password",
+        ["新密码"] = "New Password",
+        ["确认新密码"] = "Confirm Password",
+        ["两次新密码不一致"] = "New passwords do not match",
+        ["密码修改成功"] = "Password changed",
+        ["旧密码不正确"] = "Wrong old password",
+        ["新密码不能为空"] = "New password required",
+        ["新密码至少 6 位"] = "New password needs 6+ chars",
+        ["新密码不能与旧密码相同"] = "New password must differ",
+        ["用户不存在"] = "User not found",
+        ["用户名不能为空"] = "Username required",
         // ---- PLC 配置窗（V0.0.4 新增，现场点鼠标配 PLC 用）----
         ["PLC配置"] = "PLC Config",
         ["单机PLC"] = "Single PLC",

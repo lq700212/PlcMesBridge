@@ -1,19 +1,18 @@
 using System.Windows;
-using PlcMesBridge.Core.Infrastructure;
+using PlcMesBridge.ViewModels;
 
 namespace PlcMesBridge;
 
-/// <summary>报警窗（复刻 FormMESAlarm.ShowAlarm：设文本+名称，非模态置顶）。</summary>
+/// <summary>报警窗（MVVM 的 View）。用法：new MesAlarmWindow(报文, 机台名).Show()。</summary>
 public partial class MesAlarmWindow : Window
 {
+    public MesAlarmViewModel ViewModel { get; }
+
     public MesAlarmWindow(string message, string name)
     {
+        ViewModel = new MesAlarmViewModel(message, name);
+        DataContext = ViewModel;
         InitializeComponent();
-        TxtMsg.Text = message;
-        LbName.Content = name;
-        Title = LanguageService.Tr("MES 报警信息");
-        BtnClose.Content = LanguageService.Tr("关闭");
+        ViewModel.RequestClose += _ => Close();
     }
-
-    private void BtnClose_Click(object sender, RoutedEventArgs e) => Close();
 }

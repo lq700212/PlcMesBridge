@@ -3,116 +3,155 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ctrl="clr-namespace:PlcMesBridge.Controls"
         Icon="Assets/app.ico"
-        Title="PLC通信" WindowState="Maximized" Width="1230" Height="640">
-    <!--主窗（单机视图 1:1 单机版 Form1；多机视图 1:1 多机版 Form1）。
-        顶：共享菜单栏（连接/日志/调试/语言/设置，连接按单机多机模式分发）
-        + 时钟；单机：左列纵向状态带→统计带→日志 / 右 160 行产品表；
-        多机：视图筛选 + 扫描周期 + 8 机台面板。
-        Form2/Form6 死窗体不复刻：视图筛选下拉 = 它们的"只看某几台"（补齐说明见 Core 注释）。-->
+        Title="{Binding TitleText}" WindowState="Maximized" Width="1230" Height="640">
+    <!--主窗（MVVM：状态走 MainWindowViewModel，本文件纯绑定）。
+        单机视图 = 单机版 Form1；多机视图 = 多机版 Form1。
+        菜单门禁走 VM（admin/dev/未登录）；视图筛选下拉 = Form2/Form6"只看某几台"。-->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <!--顶菜单栏（单机/多机共用；操作从原来的按钮堆搬到菜单上）-->
+        <!--顶菜单栏（单机/多机共用）-->
         <DockPanel Grid.Row="0" Background="{StaticResource FreshTopBarBrush}">
-            <Menu x:Name="MainMenu" DockPanel.Dock="Left" VerticalAlignment="Center"
+            <Menu DockPanel.Dock="Left" VerticalAlignment="Center"
                   FontFamily="微软雅黑" FontSize="14" Background="Transparent">
-                <MenuItem x:Name="MiLog" Header="MES 交互实时日志" Click="BtnLog_Click"
+                <MenuItem Header="{Binding MiLogText}" Command="{Binding ShowLogCommand}"
                           Style="{StaticResource FreshMenuButton}"/>
-                <MenuItem x:Name="MiDebug" Header="MES 接口调试界面" Click="BtnDebug_Click"
+                <MenuItem Header="{Binding MiDebugText}" Command="{Binding ShowDebugCommand}"
                           Style="{StaticResource FreshMenuButton}"/>
-                <MenuItem x:Name="MiLang" Header="English" Click="BtnLang_Click"
+                <MenuItem Header="{Binding MiModeText}" Command="{Binding ShowModeCommand}"
                           Style="{StaticResource FreshMenuButton}"/>
-                <MenuItem x:Name="MiSettings" Header="设置" Click="BtnSettings_Click"
+                <!--注意：子项在 Popup 独立视觉树里，RelativeSource 找不到 Window；
+                    DataContext 走逻辑树继承（与父菜单同 VM），直接绑 VM 属性。-->
+                <MenuItem Header="{Binding MiSettingsText}"
+                          Style="{StaticResource FreshMenuDropButton}">
+                    <MenuItem Header="{Binding MiPlcText}"
+                              Command="{Binding ShowPlcCommand}"
+                              Visibility="{Binding PlcVisible,
+                                        Converter={StaticResource BoolToVisibilityConverter}}"
+                              Style="{StaticResource FreshMenuSubItem}"/>
+                    <MenuItem Header="{Binding MiChangePwdText}"
+                              Command="{Binding ShowChangePwdCommand}"
+                              IsEnabled="{Binding SettingsItemEnabled}"
+                              Style="{StaticResource FreshMenuSubItem}"/>
+                    <MenuItem Header="{Binding MiShortcutText}"
+                              Command="{Binding ShowShortcutCommand}"
+                              IsEnabled="{Binding SettingsItemEnabled}"
+                              Style="{StaticResource FreshMenuSubItem}"/>
+                </MenuItem>
+                <MenuItem Header="{Binding MiLangText}" Command="{Binding SwitchLanguageCommand}"
+                          Style="{StaticResource FreshMenuButton}"/>
+                <MenuItem Header="{Binding LoginHeader}" Command="{Binding LoginCommand}"
                           Style="{StaticResource FreshMenuButton}"/>
             </Menu>
-            <Label x:Name="LbClock" DockPanel.Dock="Right" Content=""
+            <Label DockPanel.Dock="Right" Content="{Binding ClockText}"
                    VerticalAlignment="Center" Margin="0,0,12,0"/>
         </DockPanel>
 
         <!-- ================= 单机视图 ================= -->
-        <Grid Grid.Row="1" x:Name="SingleView" Visibility="Visible">
+        <Grid Grid.Row="1" Visibility="{Binding IsSingleMode,
+                    Converter={StaticResource BoolToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <!--左列：状态卡→统计卡→日志（纵向，原左操作按钮区位置）-->
+            <!--左列：状态卡→统计卡→日志-->
             <DockPanel Grid.Column="0" Margin="6">
-                <!--状态卡（浅蓝底，微软雅黑14加粗，老项目字段原样，横排改纵排）-->
                 <Border DockPanel.Dock="Top" Style="{StaticResource FreshHintBorder}">
                     <StackPanel TextBlock.FontFamily="微软雅黑" TextBlock.FontSize="14"
                                 TextBlock.FontWeight="Bold">
-                        <Label x:Name="LbStatusTitle" Content="运行状态" FontSize="15"
+                        <Label Content="{Binding StatusTitleText}" FontSize="15"
                                Foreground="{StaticResource FreshPrimaryDeepBrush}"/>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Label x:Name="LbBeat" Content="PLC心跳" VerticalAlignment="Center"/>
-                            <Label x:Name="LbBeatLamp" Content="⚫" Foreground="Gray" VerticalAlignment="Center"/>
-                            <!--单机连接按钮（ heartbeat 灯右侧，间隙 16；主蓝按钮配浅蓝卡）-->
-                            <Button x:Name="BtnConnectInline" Content="连接PLC" Height="30"
-                                    Padding="16,2" Margin="16,0,0,0" VerticalAlignment="Center"
-                                    Click="BtnConnect_Click"/>
+                            <Label Content="{Binding BeatLabel}" VerticalAlignment="Center"/>
+                            <Label Content="⚫" Foreground="{Binding BeatLampColor}"
+                                   VerticalAlignment="Center"/>
+                            <Button Content="{Binding ConnectText}"
+                                    IsEnabled="{Binding ConnectEnabled}"
+                                    Command="{Binding ConnectSingleCommand}"
+                                    Height="30" Padding="16,2" Margin="16,0,0,0"
+                                    VerticalAlignment="Center"/>
                         </StackPanel>
-                        <Label x:Name="LbCuring" Content="固化时间: " VerticalAlignment="Center"/>
-                        <Label x:Name="LbInTime" Content="进入时间: " VerticalAlignment="Center"/>
-                        <Label x:Name="LbBin" Content="库位ID: " VerticalAlignment="Center"/>
-                        <Label x:Name="LbStatus" Content="物料状态" VerticalAlignment="Center"/>
+                        <Label Content="{Binding CuringLine}" VerticalAlignment="Center"/>
+                        <Label Content="{Binding InTimeLine}" VerticalAlignment="Center"/>
+                        <Label Content="{Binding BinLine}" VerticalAlignment="Center"/>
+                        <Label Content="{Binding StatusLine}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
-                <!--统计卡（白底，同浅蓝边框，与状态卡一眼区分）-->
                 <Border DockPanel.Dock="Top" Margin="0,8,0,0"
                         Style="{StaticResource FreshCardBorder}">
                     <StackPanel TextBlock.FontFamily="微软雅黑" TextBlock.FontSize="13"
                                 TextBlock.FontWeight="Bold">
-                        <Label x:Name="LbStatsTitle" Content="统计信息" FontSize="14"
+                        <Label Content="{Binding StatsTitleText}" FontSize="14"
                                Foreground="{StaticResource FreshPrimaryDeepBrush}"/>
-                        <Label x:Name="LbTotal" Content="库内总物料:" VerticalAlignment="Center"/>
-                        <Label x:Name="LbDone" Content="静置已完成:" VerticalAlignment="Center"/>
-                        <Label x:Name="LbResting" Content="正在静置:" VerticalAlignment="Center"/>
-                        <Label x:Name="LbTomorrow" Content="明日可完成:" VerticalAlignment="Center"/>
+                        <Label Content="{Binding TotalLine}" VerticalAlignment="Center"/>
+                        <Label Content="{Binding DoneLine}" VerticalAlignment="Center"/>
+                        <Label Content="{Binding RestingLine}" VerticalAlignment="Center"/>
+                        <Label Content="{Binding TomorrowLine}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
-                <ListBox x:Name="BoxLog" FontSize="12" Margin="0,8,0,0"
-                         MouseDoubleClick="BoxLog_DoubleClick"/>
+                <ListBox ItemsSource="{Binding LogLines}"
+                         SelectedItem="{Binding SelectedLogLine}"
+                         FontSize="12" Margin="0,8,0,0">
+                    <ListBox.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick"
+                                      Command="{Binding ShowLogDetailCommand}"/>
+                    </ListBox.InputBindings>
+                </ListBox>
             </DockPanel>
             <!--右产品表（只读，产品号/产品ID，宋体12加粗）-->
-            <DataGrid Grid.Column="1" x:Name="GridProducts" Margin="6"
+            <DataGrid Grid.Column="1" ItemsSource="{Binding Products}" Margin="6"
+                      Background="{Binding GridBackground}"
                       AutoGenerateColumns="False" IsReadOnly="True"
                       HeadersVisibility="Column" RowHeaderWidth="0"
                       RowHeight="25"
                       FontFamily="宋体" FontSize="14" FontWeight="Bold">
                 <DataGrid.Columns>
-                    <DataGridTextColumn x:Name="ColNo" Header="产品号"
+                    <DataGridTextColumn Header="{Binding DataContext.ColNoText,
+                                                  RelativeSource={RelativeSource AncestorType=Window}}"
                                         Binding="{Binding No}" Width="120"/>
-                    <DataGridTextColumn x:Name="ColId" Header="产品ID"
+                    <DataGridTextColumn Header="{Binding DataContext.ColIdText,
+                                                  RelativeSource={RelativeSource AncestorType=Window}}"
                                         Binding="{Binding ProductId}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
 
         <!-- ================= 多机视图 ================= -->
-        <Grid Grid.Row="1" x:Name="MultiView" Visibility="Collapsed">
+        <Grid Grid.Row="1" Visibility="{Binding IsMultiMode,
+                    Converter={StaticResource BoolToVisibilityConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="6,4"
                         VerticalAlignment="Center" Background="{StaticResource FreshTopBarBrush}">
-                <Button x:Name="BtnConnectM" Content="连接设备" Width="110" Height="32"
-                        Margin="4,2" VerticalAlignment="Center" Click="BtnConnectM_Click"/>
+                <Button Content="{Binding ConnectText}" IsEnabled="{Binding ConnectEnabled}"
+                        Command="{Binding ConnectMultiCommand}"
+                        Width="110" Height="32" Margin="4,2" VerticalAlignment="Center"/>
                 <Label Content="视图:" VerticalAlignment="Center" Margin="12,0,2,0"/>
-                <ComboBox x:Name="CmbView" Width="220" Height="30" VerticalAlignment="Center"
-                          VerticalContentAlignment="Center"
-                          SelectionChanged="CmbView_Changed"/>
-                <Label x:Name="LbCycle" Content="扫描周期: " Margin="16,0"
+                <ComboBox ItemsSource="{Binding ViewOptions}"
+                          SelectedIndex="{Binding SelectedViewIndex}"
+                          Width="220" Height="30" VerticalAlignment="Center"
+                          VerticalContentAlignment="Center"/>
+                <Label Content="{Binding ScanCycleText}" Margin="16,0"
                        VerticalAlignment="Center"/>
             </StackPanel>
-            <UniformGrid Grid.Row="1" x:Name="StationGrid" Columns="4" Margin="4">
-                <ctrl:StationPanel x:Name="St0"/><ctrl:StationPanel x:Name="St1"/>
-                <ctrl:StationPanel x:Name="St2"/><ctrl:StationPanel x:Name="St3"/>
-                <ctrl:StationPanel x:Name="St4"/><ctrl:StationPanel x:Name="St5"/>
-                <ctrl:StationPanel x:Name="St6"/><ctrl:StationPanel x:Name="St7"/>
-            </UniformGrid>
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Stations}" Margin="4">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="{Binding DataContext.GridColumns,
+                                    RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ctrl:StationPanel Visibility="{Binding Visible,
+                                    Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
     </Grid>
 </Window>

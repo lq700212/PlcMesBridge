@@ -74,15 +74,24 @@
 - 类/方法/属性 PascalCase；私有字段 `_camelCase`；接口前缀 `I`；事件 PascalCase。
 - **注释要详细，让小白能看懂**：每个类头写清"干什么 + 为什么 + 怎么改"，
   边界/自愈/协议细节必须注，杜绝废话注释。中文 UTF-8。
-- 业务逻辑进 `Core`（可测），WPF 层只做"事件→控件"搬运；新增业务分支必须
-  先补 `Tests` 用例（模拟 PLC + 本地 HttpListener 桩 MES，基建现成）。
+- **MVVM 分层（WPF 层）**：View（XAML 纯绑定 + xaml.cs 只设 DataContext/
+  转交密码/转发关窗）← ViewModel（`src/PlcMesBridge/ViewModels/`，状态 +
+  命令，INPC 经 `ViewModelBase`，后台线程更新经 `UiInvoke`）→ Model/Core
+  （业务，可测）+ `IDialogService`（VM 开窗/提示唯一出口，测试用
+  `tests/.../Mocks/FakeDialogService` 桩）。VM 禁止直接 new Window/
+  MessageBox/Dispatcher；PasswordBox 密码经事件转交（不可绑定，官方
+  workaround）；关窗确认/重启经服务。
+- 业务逻辑进 `Core`（可测）；新增业务分支必须先补 `Tests` 用例
+  （模拟 PLC + 本地 HttpListener 桩 MES，基建现成）；新增 VM 编排补
+  `ViewModelTests` 用例（Fake 服务 + TestScope 隔离）。
 
 ## 关键文件导航
 
 | 文件 | 作用 |
 | --- | --- |
 | `src/PlcMesBridge/MainWindow.*` | 主窗：单机/多机双视图、后台节拍、视图筛选（替代 Form2/Form6） |
-| `src/PlcMesBridge/Controls/StationPanel.*` | 机台面板复用件（名+灯+日志，8 实例） |
+| `src/PlcMesBridge/Controls/StationPanel.*` | 机台面板复用件（MVVM View，VM 由主窗注入，8 实例） |
+| `src/PlcMesBridge/ViewModels/` | 全部 VM（`ViewModelBase`/`RelayCommand`/`IDialogService` 基建 + 各窗 VM，主窗 VM 含双视图/节拍/门禁） |
 | `src/PlcMesBridge/MesDebugWindow.*` | 调试窗：5 接口表单 + API0033 扩展 + 预览上传 |
 | `src/PlcMesBridge/MesLogWindow.*` | 日志窗（-1 单机全量 / >=0 分机台，关窗退订） |
 | `src/PlcMesBridge/PlcConfigWindow.*` | PLC 配置窗（单机/多机/接口三页 + 测试连接 + 保存重启，逻辑在 Core） |

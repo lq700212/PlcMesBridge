@@ -1,24 +1,17 @@
 using System.Windows;
-using System.Windows.Media.Imaging;
-using PlcMesBridge.Core.Infrastructure;
+using PlcMesBridge.ViewModels;
 
 namespace PlcMesBridge;
 
-/// <summary>图片查看（复刻 FormImage.New(imagepath)：设图 + 显示路径 + Show）。</summary>
+/// <summary>图片查看（MVVM 的 View）。用法：new ImageWindow(全路径).Show()。</summary>
 public partial class ImageWindow : Window
 {
+    public ImageViewModel ViewModel { get; }
+
     public ImageWindow(string imagePath)
     {
+        ViewModel = new ImageViewModel(imagePath);
+        DataContext = ViewModel;
         InitializeComponent();
-        Title = LanguageService.Tr("图片查看");
-        LbPath.Content = imagePath;
-        try
-        {
-            Img.Source = new BitmapImage(new Uri(imagePath));
-        }
-        catch
-        {
-            LbPath.Content = imagePath + "（加载失败）";
-        }
     }
 }

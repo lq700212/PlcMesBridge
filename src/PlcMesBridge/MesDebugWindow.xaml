@@ -2,33 +2,51 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Icon="Assets/app.ico"
-        Title="MES 接口调试界面" Width="834" Height="560"
+        Title="{Binding TitleText}" Width="834" Height="560"
         WindowStartupLocation="CenterScreen">
-    <!--调试窗（1:1 单机版 FormMESDebug：接口下拉→动态表单显隐→JSON预览→手动上传）。
-        融合版追加 API0033（不良明细，15 字段，定义见 xaml.cs 顶部注释）。-->
+    <!--调试窗（MVVM：表单行走 MesDebugViewModel，本文件纯绑定）。
+        字段行按接口显隐（Visible→Visibility）；值一改预览即刷新。-->
     <DockPanel Margin="8">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,6">
-            <Label x:Name="LbApi" Content="接口类型:" VerticalAlignment="Center"/>
-            <ComboBox x:Name="CmbApi" Width="140" Height="28"
-                      SelectionChanged="CmbApi_Changed"/>
-            <Button x:Name="BtnSave" Content="保存参数到本地" Width="130" Height="30"
-                    Margin="12,0,0,0" Click="BtnSave_Click"/>
-            <Button x:Name="BtnUpload" Content="手动上传到MES" Width="130" Height="30"
+            <Label Content="{Binding ApiLabel}" VerticalAlignment="Center"/>
+            <ComboBox ItemsSource="{Binding Apis}" SelectedItem="{Binding SelectedApi}"
+                      Width="140" Height="28"/>
+            <Button Content="{Binding SaveText}" Width="130" Height="30"
+                    Margin="12,0,0,0" Command="{Binding SaveCommand}"/>
+            <Button Content="{Binding UploadText}" Width="130" Height="30"
                     Margin="8,0,0,0" Background="#1E88E5" Foreground="White"
-                    Click="BtnUpload_Click"/>
-            <Button x:Name="BtnLang" Content="English" Width="70" Height="30"
-                    Margin="8,0,0,0" Click="BtnLang_Click"/>
+                    Command="{Binding UploadCommand}"
+                    IsEnabled="{Binding UploadEnabled}"/>
+            <Button Content="{Binding LangText}" Width="70" Height="30"
+                    Margin="8,0,0,0" Command="{Binding SwitchLanguageCommand}"/>
         </StackPanel>
-        <Label x:Name="LbResp" Content="MES 返回信息:" DockPanel.Dock="Bottom"/>
-        <TextBox x:Name="TxtResp" DockPanel.Dock="Bottom" Height="110"
+        <Label Content="{Binding RespLabel}" DockPanel.Dock="Bottom"/>
+        <TextBox Text="{Binding Response, Mode=OneWay}" DockPanel.Dock="Bottom" Height="110"
                  IsReadOnly="True" Background="#F0F0F0" TextWrapping="Wrap"
                  VerticalScrollBarVisibility="Auto" Margin="0,2,0,6"/>
-        <Label x:Name="LbPreview" Content="发送报文预览:" DockPanel.Dock="Bottom"/>
-        <TextBox x:Name="TxtPreview" DockPanel.Dock="Bottom" Height="52"
+        <Label Content="{Binding PreviewLabel}" DockPanel.Dock="Bottom"/>
+        <TextBox Text="{Binding Preview, Mode=OneWay}" DockPanel.Dock="Bottom" Height="52"
                  IsReadOnly="True" TextWrapping="Wrap"
                  VerticalScrollBarVisibility="Auto" Margin="0,2,0,6"/>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <WrapPanel x:Name="PanelParams"/>
+            <ItemsControl ItemsSource="{Binding Fields}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Width="240" Height="52" Margin="5"
+                                    Visibility="{Binding Visible,
+                                        Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Label Content="{Binding Caption}" Foreground="DarkBlue"
+                                   Padding="0"/>
+                            <TextBox Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </ScrollViewer>
     </DockPanel>
 </Window>

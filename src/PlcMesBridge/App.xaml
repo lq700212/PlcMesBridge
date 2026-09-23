@@ -8,6 +8,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/FreshBlue.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <!--MVVM 布尔→显隐（改密码窗旧密码行等用，全局一个）-->
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
